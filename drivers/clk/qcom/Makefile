@@ -21,6 +21,13 @@ clk-qcom-y += gdsc-regulator.o
 clk-qcom-$(CONFIG_QCOM_GDSC) += gdsc.o
 obj-$(CONFIG_COMMON_CLK_QCOM) += clk-dummy.o
 
+obj-$(CONFIG_SDM_GCC_845) += gcc-sdm845.o
+obj-$(CONFIG_SDM_CAMCC_845) += camcc-sdm845.o
+obj-$(CONFIG_SDM_DEBUGCC_845) += debugcc-sdm845.o
+obj-$(CONFIG_SDM_DISPCC_845) += dispcc-sdm845.o
+obj-$(CONFIG_SDM_GPUCC_845) += gpucc-sdm845.o
+obj-$(CONFIG_SDM_VIDEOCC_845) += videocc-sdm845.o
+
 # Keep alphabetically sorted by config
 obj-$(CONFIG_APQ_GCC_8084) += gcc-apq8084.o
 obj-$(CONFIG_APQ_MMCC_8084) += mmcc-apq8084.o
@@ -64,13 +71,6 @@ obj-$(CONFIG_SC_CAMCC_SHRIKE) += camcc-scshrike.o
 obj-$(CONFIG_SC_DISPCC_SHRIKE) += dispcc-scshrike.o
 obj-$(CONFIG_SC_DEBUGCC_SHRIKE) += debugcc-scshrike.o
 obj-$(CONFIG_SC_GCC_SHRIKE) += gcc-scshrike.o
-obj-$(CONFIG_SDM_CAMCC_845) += camcc-sdm845.o
-obj-$(CONFIG_SDM_DISPCC_845) += dispcc-sdm845.o
-obj-$(CONFIG_SDM_GCC_660) += gcc-sdm660.o
-obj-$(CONFIG_SDM_GCC_845) += gcc-sdm845.o
-obj-$(CONFIG_SDM_GPUCC_845) += gpucc-sdm845.o
-obj-$(CONFIG_SDM_LPASSCC_845) += lpasscc-sdm845.o
-obj-$(CONFIG_SDM_VIDEOCC_845) += videocc-sdm845.o
 obj-$(CONFIG_SDW_DEBUGCC_MONACO) += debugcc-monaco.o
 obj-$(CONFIG_SDW_DISPCC_MONACO) += dispcc-monaco.o
 obj-$(CONFIG_SDW_GCC_MONACO) += gcc-monaco.o
