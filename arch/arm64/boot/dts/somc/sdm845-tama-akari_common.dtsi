@@ -91,6 +91,8 @@
 };
 
 #include "dsi-panel-akari.dtsi"
+#include "somc-tama-camera.dtsi"
+#include "somc-tama-camera_akari.dtsi"
 #include "somc-tama-display.dtsi"
 #include "somc-tama-display_akari.dtsi"
 #include "somc-tama-touch.dtsi"

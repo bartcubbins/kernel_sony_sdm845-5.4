@@ -62,6 +62,8 @@
 };
 
 #include "dsi-panel-apollo.dtsi"
+#include "somc-tama-camera.dtsi"
+#include "somc-tama-camera_apollo.dtsi"
 #include "somc-tama-display.dtsi"
 #include "somc-tama-display_apollo.dtsi"
 #include "somc-tama-touch.dtsi"

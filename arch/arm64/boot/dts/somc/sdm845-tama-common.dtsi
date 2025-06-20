@@ -40,74 +40,6 @@
 	};
 };
 
-&cam_cci {
-	/* The value of clock that depens on the following parameter is different from Qualcomm.
-	Change the value for Somc. */
-	qcom,i2c_fast_mode {
-		hw-thigh = <43>;
-		hw-tlow = <64>;
-		hw-tsu-sto = <41>;
-		hw-tsu-sta = <41>;
-		hw-thd-dat = <25>;
-		hw-thd-sta = <35>;
-		hw-tbuf = <64>;
-		hw-scl-stretch-en = <0>;
-		hw-trdhld = <6>;
-		hw-tsp = <3>;
-		cci-clk-src = <37500000>;
-		status = "ok";
-	};
-	qcom,i2c_fast_plus_mode {
-		hw-thigh = <16>;
-		hw-tlow = <22>;
-		hw-tsu-sto = <17>;
-		hw-tsu-sta = <18>;
-		hw-thd-dat = <16>;
-		hw-thd-sta = <15>;
-		hw-tbuf = <19>;
-		hw-scl-stretch-en = <1>;
-		hw-trdhld = <3>;
-		hw-tsp = <3>;
-		cci-clk-src = <37500000>;
-		status = "ok";
-	};
-
-	qcom,cam-sensor@0 {
-		status = "disable";
-	};
-	qcom,cam-sensor@1 {
-		status = "disable";
-	};
-	qcom,cam-sensor@2 {
-		status = "disable";
-	};
-	qcom,cam-sensor@3 {
-		status = "disable";
-	};
-};
-
-&actuator_rear {
-	status = "disable";
-};
-&actuator_rear_aux {
-	status = "disable";
-};
-&actuator_front {
-	status = "disable";
-};
-&ois_rear {
-	status = "disable";
-};
-&eeprom_rear {
-	status = "disable";
-};
-&eeprom_rear_aux {
-	status = "disable";
-};
-&eeprom_front {
-	status = "disable";
-};
-
 &soc {
 	restart-reason {
 		compatible = "qcom,restart-reason";
@@ -607,25 +539,6 @@
 	};
 };
 
-&led_flash_rear {
-	status = "disabled";
-};
-&led_flash_rear_aux {
-	status = "disabled";
-};
-&led_flash_front {
-	status = "disabled";
-};
-&actuator_regulator {
-	status = "disabled";
-};
-&camera_rear_ldo {
-	status = "disabled";
-};
-&camera_ldo {
-	status = "disabled";
-};
-
 &usb1 {
 	extcon = <0>;
 };
@@ -721,56 +634,6 @@
 	extcon_usb1 {
 		status = "disabled";
 	};
-};
-
-&flash_led {
-	qcom,hw-strobe-option = <1>;
-};
-
-&pmi8998_flash0 {
-	qcom,current-ma = <625>;
-	qcom,max-current = <1000>;
-	qcom,hw-strobe-edge-trigger;
-	qcom,strobe-sel = <1>;
-	somc,sw-strobe-init;
-};
-
-&pmi8998_flash1 {
-	qcom,current-ma = <625>;
-	qcom,max-current = <1000>;
-	qcom,hw-strobe-edge-trigger;
-	qcom,strobe-sel = <1>;
-	somc,sw-strobe-init;
-};
-
-&pmi8998_flash2 {
-	status = "disabled";
-};
-
-&pmi8998_torch0 {
-	qcom,current-ma = <120>;
-	qcom,max-current = <200>;
-	qcom,strobe-sel = <1>;
-	somc,sw-strobe-init;
-};
-
-&pmi8998_torch1 {
-	qcom,current-ma = <120>;
-	qcom,max-current = <200>;
-	qcom,strobe-sel = <1>;
-	somc,sw-strobe-init;
-};
-
-&pmi8998_torch2 {
-	status = "disabled";
-};
-
-&pmi8998_switch0 {
-	qcom,led-mask = <3>;
-};
-
-&pmi8998_switch1 {
-	status = "disabled";
 };
 
 &key_cam_focus_default {

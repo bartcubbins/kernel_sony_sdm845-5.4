@@ -9,7 +9,7 @@
 #include "sdm845-pmic-overlay.dtsi"
 #include "sdm845-thermal-overlay.dtsi"
 #include "sdm845-pinctrl-overlay.dtsi"
-#include "sdm845-camera-sensor-mtp.dtsi"
+//#include "sdm845-camera-sensor-mtp.dtsi"
 
 &qupv3_se10_i2c {
 	#address-cells = <1>;

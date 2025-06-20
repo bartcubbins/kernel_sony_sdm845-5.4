@@ -413,6 +413,8 @@
 };
 
 #include "dsi-panel-akatsuki.dtsi"
+#include "somc-tama-camera.dtsi"
+#include "somc-tama-camera_akatsuki.dtsi"
 #include "somc-tama-display.dtsi"
 #include "somc-tama-display_akatsuki.dtsi"
 #include "somc-tama-touch.dtsi"
