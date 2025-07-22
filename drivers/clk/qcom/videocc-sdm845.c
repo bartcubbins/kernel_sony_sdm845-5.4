@@ -1,36 +1,31 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021-2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 #define pr_fmt(fmt) "clk: %s: " fmt, __func__
 
-#include <linux/kernel.h>
-#include <linux/bitops.h>
-#include <linux/err.h>
-#include <linux/platform_device.h>
-#include <linux/module.h>
-#include <linux/of.h>
-#include <linux/of_device.h>
-#include <linux/clk.h>
 #include <linux/clk-provider.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/of_device.h>
+#include <linux/of.h>
 #include <linux/regmap.h>
-#include <linux/reset-controller.h>
 
 #include <dt-bindings/clock/qcom,videocc-sdm845.h>
 
-#include "common.h"
-#include "clk-regmap.h"
-#include "clk-pll.h"
-#include "clk-rcg.h"
-#include "clk-branch.h"
-#include "reset.h"
 #include "clk-alpha-pll.h"
+#include "clk-branch.h"
+#include "clk-rcg.h"
+#include "clk-regmap-divider.h"
+#include "common.h"
+#include "reset.h"
 #include "vdd-level-sdm845.h"
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
-static DEFINE_VDD_REGULATORS(vdd_cx, VDD_CX_NUM, 1, vdd_corner);
+static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
 
 enum {
 	P_BI_TCXO,
@@ -77,11 +72,15 @@ static struct clk_alpha_pll video_pll0 = {
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
 			.ops = &clk_alpha_pll_fabia_ops,
-			VDD_CX_FMAX_MAP4(
-				MIN, 615000000,
-				LOW, 1066000000,
-				LOW_L1, 1600000000,
-				NOMINAL, 2000000000),
+		},
+		.vdd_data = {
+			.vdd_class = &vdd_cx,
+			.num_rate_max = VDD_NUM,
+			.rate_max = (unsigned long[VDD_NUM]) {
+				[VDD_MIN] = 615000000,
+				[VDD_LOW] = 1066000000,
+				[VDD_LOW_L1] = 1600000000,
+				[VDD_NOMINAL] = 2000000000},
 		},
 	},
 };
@@ -130,13 +129,17 @@ static struct clk_rcg2 video_cc_venus_clk_src = {
 		.num_parents = 5,
 		.flags = CLK_SET_RATE_PARENT,
 		.ops = &clk_rcg2_ops,
-		VDD_CX_FMAX_MAP6(
-			MIN, 100000000,
-			LOWER, 200000000,
-			LOW, 320000000,
-			LOW_L1, 380000000,
-			NOMINAL, 444000000,
-			HIGH, 533000000),
+	},
+	.clkr.vdd_data = {
+		.vdd_class = &vdd_cx,
+		.num_rate_max = VDD_NUM,
+		.rate_max = (unsigned long[VDD_NUM]) {
+			[VDD_MIN] = 100000000,
+			[VDD_LOWER] = 200000000,
+			[VDD_LOW] = 320000000,
+			[VDD_LOW_L1] = 380000000,
+			[VDD_NOMINAL] = 444000000,
+			[VDD_HIGH] = 533000000},
 	},
 };
 
@@ -339,16 +342,16 @@ MODULE_DEVICE_TABLE(of, video_cc_sdm845_match_table);
 static void video_cc_sdm845_fixup_sdm845v2(void)
 {
 	video_cc_venus_clk_src.freq_tbl = ftbl_video_cc_venus_clk_src_sdm845_v2;
-	video_cc_venus_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW] = 330000000;
-	video_cc_venus_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW_L1] =
+	video_cc_venus_clk_src.clkr.vdd_data.rate_max[VDD_LOW] = 330000000;
+	video_cc_venus_clk_src.clkr.vdd_data.rate_max[VDD_LOW] =
 		404000000;
 }
 
 static void video_cc_sdm845_fixup_sdm670(void)
 {
 	video_cc_venus_clk_src.freq_tbl = ftbl_video_cc_venus_clk_src_sdm670;
-	video_cc_venus_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW] = 330000000;
-	video_cc_venus_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW_L1] =
+	video_cc_venus_clk_src.clkr.vdd_data.rate_max[VDD_LOW] = 330000000;
+	video_cc_venus_clk_src.clkr.vdd_data.rate_max[VDD_LOW] =
 		404000000;
 }
 

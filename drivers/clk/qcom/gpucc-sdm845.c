@@ -1,31 +1,28 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021-2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 #define pr_fmt(fmt) "clk: %s: " fmt, __func__
 
-#include <linux/kernel.h>
-#include <linux/bitops.h>
-#include <linux/err.h>
-#include <linux/platform_device.h>
-#include <linux/module.h>
-#include <linux/of.h>
-#include <linux/of_device.h>
 #include <linux/clk-provider.h>
+#include <linux/err.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/io.h>
+#include <linux/of_device.h>
+#include <linux/of.h>
 #include <linux/regmap.h>
-#include <linux/reset-controller.h>
-#include <linux/clk.h>
-#include <linux/clk/qcom.h>
+
 #include <dt-bindings/clock/qcom,gpucc-sdm845.h>
 
-#include "common.h"
-#include "clk-regmap.h"
-#include "clk-pll.h"
-#include "clk-rcg.h"
-#include "clk-branch.h"
-#include "reset.h"
 #include "clk-alpha-pll.h"
+#include "clk-branch.h"
+#include "clk-rcg.h"
+#include "clk-regmap.h"
+#include "common.h"
+#include "reset.h"
 #include "vdd-level-sdm845.h"
 
 #define CX_GMU_CBCR_SLEEP_MASK		0xF
@@ -35,21 +32,8 @@
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
-static int vdd_gx_corner[] = {
-	0,					/* VDD_GX_NONE */
-	RPMH_REGULATOR_LEVEL_MIN_SVS,		/* VDD_GX_MIN */
-	RPMH_REGULATOR_LEVEL_LOW_SVS,		/* VDD_GX_LOWER */
-	RPMH_REGULATOR_LEVEL_SVS,		/* VDD_GX_LOW */
-	RPMH_REGULATOR_LEVEL_SVS_L1,		/* VDD_GX_LOW_L1 */
-	RPMH_REGULATOR_LEVEL_NOM,		/* VDD_GX_NOMINAL */
-	RPMH_REGULATOR_LEVEL_NOM_L1,		/* VDD_GX_NOMINAL_L1 */
-	RPMH_REGULATOR_LEVEL_TURBO,		/* VDD_GX_HIGH */
-	RPMH_REGULATOR_LEVEL_TURBO_L1,		/* VDD_GX_HIGH_L1 */
-	RPMH_REGULATOR_LEVEL_MAX,		/* VDD_GX_MAX */
-};
-
-static DEFINE_VDD_REGULATORS(vdd_cx, VDD_CX_NUM, 1, vdd_corner);
-static DEFINE_VDD_REGULATORS(vdd_mx, VDD_CX_NUM, 1, vdd_corner);
+static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
+static DEFINE_VDD_REGULATORS(vdd_mx, VDD_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_gfx, VDD_GX_NUM, 1, vdd_gx_corner);
 
 enum {
@@ -150,11 +134,15 @@ static struct clk_alpha_pll gpu_cc_pll0 = {
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
 			.ops = &clk_alpha_pll_fabia_ops,
-			VDD_MX_FMAX_MAP4(
-				MIN, 615000000,
-				LOW, 1066000000,
-				LOW_L1, 1600000000,
-				NOMINAL, 2000000000),
+		},
+		.vdd_data = {
+			.vdd_class = &vdd_mx,
+			.num_rate_max = VDD_NUM,
+			.rate_max = (unsigned long[VDD_NUM]) {
+				[VDD_MIN] = 615000000,
+				[VDD_LOW] = 1066000000,
+				[VDD_LOW_L1] = 1600000000,
+				[VDD_NOMINAL] = 2000000000},
 		},
 	},
 };
@@ -194,11 +182,15 @@ static struct clk_alpha_pll gpu_cc_pll1 = {
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
 			.ops = &clk_alpha_pll_fabia_ops,
-			VDD_MX_FMAX_MAP4(
-				MIN, 615000000,
-				LOW, 1066000000,
-				LOW_L1, 1600000000,
-				NOMINAL, 2000000000),
+		},
+		.vdd_data = {
+			.vdd_class = &vdd_mx,
+			.num_rate_max = VDD_NUM,
+			.rate_max = (unsigned long[VDD_NUM]) {
+				[VDD_MIN] = 615000000,
+				[VDD_LOW] = 1066000000,
+				[VDD_LOW_L1] = 1600000000,
+				[VDD_NOMINAL] = 2000000000},
 		},
 	},
 };
@@ -236,9 +228,13 @@ static struct clk_rcg2 gpu_cc_gmu_clk_src = {
 		.num_parents = 6,
 		.flags = CLK_SET_RATE_PARENT,
 		.ops = &clk_rcg2_ops,
-		VDD_CX_FMAX_MAP2(
-			MIN, 200000000,
-			LOW, 400000000),
+	},
+	.clkr.vdd_data = {
+		.vdd_class = &vdd_cx,
+		.num_rate_max = VDD_NUM,
+		.rate_max = (unsigned long[VDD_NUM]) {
+			[VDD_MIN] = 200000000,
+			[VDD_LOWER] = 400000000,},
 	},
 };
 
@@ -306,15 +302,19 @@ static struct clk_rcg2 gpu_cc_gx_gfx3d_clk_src = {
 		.num_parents = 7,
 		.flags = CLK_SET_RATE_PARENT,
 		.ops =  &clk_rcg2_ops,
-		VDD_GX_FMAX_MAP8(
-			MIN, 147000000,
-			LOWER, 210000000,
-			LOW, 280000000,
-			LOW_L1, 338000000,
-			NOMINAL, 425000000,
-			NOMINAL_L1, 487000000,
-			HIGH, 548000000,
-			HIGH_L1, 600000000),
+	},
+	.clkr.vdd_data = {
+		.vdd_class = &vdd_gfx,
+		.num_rate_max = VDD_GX_NUM,
+		.rate_max = (unsigned long[VDD_GX_NUM]) {
+			[VDD_GX_MIN] = 147000000,
+			[VDD_GX_LOWER] = 210000000,
+			[VDD_GX_LOW] = 280000000,
+			[VDD_GX_LOW_L1] = 338000000,
+			[VDD_GX_NOMINAL] = 425000000,
+			[VDD_GX_NOMINAL_L1] = 487000000,
+			[VDD_GX_HIGH] = 548000000,
+			[VDD_GX_HIGH_L1] = 600000000},
 	},
 };
 
@@ -604,7 +604,7 @@ static void gpu_cc_sdm845_fixup_sdm845v2(struct regmap *regmap)
 	clk_fabia_pll_configure(&gpu_cc_pll1, regmap, &gpu_cc_pll1_config);
 
 	gpu_cc_gmu_clk_src.freq_tbl = ftbl_gpu_cc_gmu_clk_src_sdm845_v2;
-	gpu_cc_gmu_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW] = 500000000;
+	gpu_cc_gmu_clk_src.clkr.vdd_data.rate_max[VDD_LOW] = 500000000;
 }
 
 static void gpu_cc_sdm845_fixup_sdm670(struct regmap *regmap)
@@ -613,25 +613,25 @@ static void gpu_cc_sdm845_fixup_sdm670(struct regmap *regmap)
 	clk_fabia_pll_configure(&gpu_cc_pll1, regmap, &gpu_cc_pll1_config);
 
 	gpu_cc_gmu_clk_src.freq_tbl = ftbl_gpu_cc_gmu_clk_src_sdm670;
-	gpu_cc_gmu_clk_src.clkr.hw.init->rate_max[VDD_CX_LOW] = 200000000;
+	gpu_cc_gmu_clk_src.clkr.vdd_data.rate_max[VDD_LOW] = 200000000;
 }
 
 static void gpu_cc_gfx_sdm845_fixup_sdm845v2(void)
 {
 	gpu_cc_gx_gfx3d_clk_src.freq_tbl =
 				ftbl_gpu_cc_gx_gfx3d_clk_src_sdm845_v2;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_MIN] = 180000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOWER] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_MIN] = 180000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOWER] =
 		257000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOW] = 342000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOW_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOW] = 342000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOW_L1] =
 		414000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_NOMINAL] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_NOMINAL] =
 		520000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_NOMINAL_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_NOMINAL_L1] =
 		596000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_HIGH] = 675000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_HIGH_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_HIGH] = 675000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_HIGH_L1] =
 		710000000;
 }
 
@@ -639,18 +639,18 @@ static void gpu_cc_gfx_sdm845_fixup_sdm670(void)
 {
 	gpu_cc_gx_gfx3d_clk_src.freq_tbl =
 				ftbl_gpu_cc_gx_gfx3d_clk_src_sdm670;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_MIN] = 180000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOWER] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_MIN] = 180000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOWER] =
 		267000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOW] = 355000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_LOW_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOW] = 355000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_LOW_L1] =
 		430000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_NOMINAL] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_NOMINAL] =
 		565000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_NOMINAL_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_NOMINAL_L1] =
 		650000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_HIGH] = 750000000;
-	gpu_cc_gx_gfx3d_clk_src.clkr.hw.init->rate_max[VDD_GX_HIGH_L1] =
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_HIGH] = 750000000;
+	gpu_cc_gx_gfx3d_clk_src.clkr.vdd_data.rate_max[VDD_GX_HIGH_L1] =
 		780000000;
 }
 
@@ -729,9 +729,6 @@ static int gpu_cc_gfx_sdm845_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "Unable to get vdd_gfx regulator\n");
 		return PTR_ERR(vdd_gfx.regulator[0]);
 	}
-
-	/* Avoid turning on the rail during clock registration */
-	vdd_gfx.skip_handoff = true;
 
 	ret = gpu_cc_gfx_sdm845_fixup(pdev);
 	if (ret) {
