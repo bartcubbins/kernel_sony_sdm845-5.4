@@ -32,6 +32,10 @@
 
 static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
 
+static struct clk_vdd_class *disp_cc_sdm845_regulators[] = {
+	&vdd_cx,
+};
+
 enum {
 	P_BI_TCXO,
 	P_CORE_BI_PLL_TEST_SE,
@@ -1068,6 +1072,8 @@ static const struct qcom_cc_desc disp_cc_sdm845_desc = {
 	.num_clks = ARRAY_SIZE(disp_cc_sdm845_clocks),
 	.resets = disp_cc_sdm845_resets,
 	.num_resets = ARRAY_SIZE(disp_cc_sdm845_resets),
+	.clk_regulators = disp_cc_sdm845_regulators,
+	.num_clk_regulators = ARRAY_SIZE(disp_cc_sdm845_regulators),
 };
 
 static const struct of_device_id disp_cc_sdm845_match_table[] = {
@@ -1167,14 +1173,6 @@ static int disp_cc_sdm845_probe(struct platform_device *pdev)
 	if (IS_ERR(regmap)) {
 		pr_err("Failed to map the Display CC registers\n");
 		return PTR_ERR(regmap);
-	}
-
-	vdd_cx.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_cx");
-	if (IS_ERR(vdd_cx.regulator[0])) {
-		if (!(PTR_ERR(vdd_cx.regulator[0]) == -EPROBE_DEFER))
-			dev_err(&pdev->dev,
-				"Unable to get vdd_cx regulator\n");
-		return PTR_ERR(vdd_cx.regulator[0]);
 	}
 
 	clk_fabia_pll_configure(&disp_cc_pll0, regmap, &disp_cc_pll0_config);

@@ -27,6 +27,10 @@
 
 static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
 
+static struct clk_vdd_class *video_cc_sdm845_regulators[] = {
+	&vdd_cx,
+};
+
 enum {
 	P_BI_TCXO,
 	P_CORE_BI_PLL_TEST_SE,
@@ -329,6 +333,8 @@ static const struct qcom_cc_desc video_cc_sdm845_desc = {
 	.config = &video_cc_sdm845_regmap_config,
 	.clks = video_cc_sdm845_clocks,
 	.num_clks = ARRAY_SIZE(video_cc_sdm845_clocks),
+	.clk_regulators = video_cc_sdm845_regulators,
+	.num_clk_regulators = ARRAY_SIZE(video_cc_sdm845_regulators),
 };
 
 static const struct of_device_id video_cc_sdm845_match_table[] = {

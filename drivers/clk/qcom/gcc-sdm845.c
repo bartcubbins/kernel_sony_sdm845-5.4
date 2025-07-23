@@ -33,6 +33,11 @@
 static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_cx_ao, VDD_NUM, 1, vdd_corner);
 
+static struct clk_vdd_class *gcc_sdm845_regulators[] = {
+	&vdd_cx,
+	&vdd_cx_ao,
+};
+
 enum {
 	P_BI_TCXO,
 	P_AUD_REF_CLK,
@@ -4285,6 +4290,8 @@ static const struct qcom_cc_desc gcc_sdm845_desc = {
 	.num_hwclks = ARRAY_SIZE(gcc_sdm845_hws),
 	.resets = gcc_sdm845_resets,
 	.num_resets = ARRAY_SIZE(gcc_sdm845_resets),
+	.clk_regulators = gcc_sdm845_regulators,
+	.num_clk_regulators = ARRAY_SIZE(gcc_sdm845_regulators),
 };
 
 static const struct of_device_id gcc_sdm845_match_table[] = {
@@ -4507,22 +4514,6 @@ static int gcc_sdm845_probe(struct platform_device *pdev)
 	regmap = qcom_cc_map(pdev, &gcc_sdm845_desc);
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);
-
-	vdd_cx.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_cx");
-	if (IS_ERR(vdd_cx.regulator[0])) {
-		if (!(PTR_ERR(vdd_cx.regulator[0]) == -EPROBE_DEFER))
-			dev_err(&pdev->dev,
-				"Unable to get vdd_cx regulator\n");
-		return PTR_ERR(vdd_cx.regulator[0]);
-	}
-
-	vdd_cx_ao.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_cx_ao");
-	if (IS_ERR(vdd_cx_ao.regulator[0])) {
-		if (!(PTR_ERR(vdd_cx_ao.regulator[0]) == -EPROBE_DEFER))
-			dev_err(&pdev->dev,
-				"Unable to get vdd_cx_ao regulator\n");
-		return PTR_ERR(vdd_cx_ao.regulator[0]);
-	}
 
 	ret = gcc_sdm845_fixup(pdev);
 	if (ret)
