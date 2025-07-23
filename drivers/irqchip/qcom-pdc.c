@@ -555,6 +555,7 @@ static const struct of_device_id qcom_pdc_match_table[] = {
 	{ .compatible = "qcom,lahaina-pdc" },
 	{ .compatible = "qcom,direwolf-pdc"},
 	{ .compatible = "qcom,shima-pdc" },
+	{ .compatible = "qcom,sdm845-pdc" },
 	{ .compatible = "qcom,sm8150-pdc" },
 	{ .compatible = "qcom,sm6150-pdc" },
 	{ .compatible = "qcom,yupik-pdc" },
@@ -575,6 +576,7 @@ IRQCHIP_DECLARE(qcom_pdc, "qcom,pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_lahaina, "qcom,lahaina-pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_direwolf, "qcom,direwolf-pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_shima, "qcom,shima-pdc", qcom_pdc_init);
+IRQCHIP_DECLARE(pdc_sdm845, "qcom,sdm845-pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_sm6150, "qcom,sm6150-pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_sm8150, "qcom,sm8150-pdc", qcom_pdc_init);
 IRQCHIP_DECLARE(pdc_yupik, "qcom,yupik-pdc", qcom_pdc_init);
