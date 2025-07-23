@@ -205,38 +205,6 @@ static const char * const gcc_parent_names_11[] = {
 	"core_bi_pll_test_se",
 };
 
-static struct clk_dummy measure_only_snoc_clk = {
-	.rrate = 1000,
-	.hw.init = &(struct clk_init_data){
-		.name = "measure_only_snoc_clk",
-		.ops = &clk_dummy_ops,
-	},
-};
-
-static struct clk_dummy measure_only_cnoc_clk = {
-	.rrate = 1000,
-	.hw.init = &(struct clk_init_data){
-		.name = "measure_only_cnoc_clk",
-		.ops = &clk_dummy_ops,
-	},
-};
-
-static struct clk_dummy measure_only_bimc_clk = {
-	.rrate = 1000,
-	.hw.init = &(struct clk_init_data){
-		.name = "measure_only_bimc_clk",
-		.ops = &clk_dummy_ops,
-	},
-};
-
-static struct clk_dummy measure_only_ipa_2x_clk = {
-	.rrate = 1000,
-	.hw.init = &(struct clk_init_data){
-		.name = "measure_only_ipa_2x_clk",
-		.ops = &clk_dummy_ops,
-	},
-};
-
 static struct pll_vco fabia_vco[] = {
 	{ 249600000, 2000000000, 0 },
 	{ 125000000, 1000000000, 1 },
@@ -1727,11 +1695,6 @@ static struct clk_branch gcc_aggre_ufs_phy_axi_clk = {
 		},
 	},
 };
-
-static DEFINE_CLK_VOTER(ufs_phy_axi_emmc_vote_clk,
-					gcc_aggre_ufs_phy_axi_clk, 0);
-static DEFINE_CLK_VOTER(ufs_phy_axi_ufs_vote_clk,
-					gcc_aggre_ufs_phy_axi_clk, 0);
 
 static struct clk_branch gcc_aggre_ufs_phy_axi_hw_ctl_clk = {
 	.halt_reg = 0x82024,
@@ -4003,15 +3966,6 @@ static struct clk_branch gcc_vs_ctrl_clk = {
 	},
 };
 
-struct clk_hw *gcc_sdm845_hws[] = {
-	[MEASURE_ONLY_SNOC_CLK] = &measure_only_snoc_clk.hw,
-	[MEASURE_ONLY_CNOC_CLK] = &measure_only_cnoc_clk.hw,
-	[MEASURE_ONLY_BIMC_CLK] = &measure_only_bimc_clk.hw,
-	[MEASURE_ONLY_IPA_2X_CLK] = &measure_only_ipa_2x_clk.hw,
-	[UFS_PHY_AXI_EMMC_VOTE_CLK] = &ufs_phy_axi_emmc_vote_clk.hw,
-	[UFS_PHY_AXI_UFS_VOTE_CLK] = &ufs_phy_axi_ufs_vote_clk.hw,
-};
-
 static struct clk_regmap *gcc_sdm845_clocks[] = {
 	[GCC_AGGRE_NOC_PCIE_TBU_CLK] = &gcc_aggre_noc_pcie_tbu_clk.clkr,
 	[GCC_AGGRE_UFS_CARD_AXI_CLK] = &gcc_aggre_ufs_card_axi_clk.clkr,
@@ -4286,8 +4240,6 @@ static const struct qcom_cc_desc gcc_sdm845_desc = {
 	.config = &gcc_sdm845_regmap_config,
 	.clks = gcc_sdm845_clocks,
 	.num_clks = ARRAY_SIZE(gcc_sdm845_clocks),
-	.hwclks = gcc_sdm845_hws,
-	.num_hwclks = ARRAY_SIZE(gcc_sdm845_hws),
 	.resets = gcc_sdm845_resets,
 	.num_resets = ARRAY_SIZE(gcc_sdm845_resets),
 	.clk_regulators = gcc_sdm845_regulators,
