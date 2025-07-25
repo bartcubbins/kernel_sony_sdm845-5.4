@@ -2302,6 +2302,14 @@ ufs_qcom_query_ioctl(struct ufs_hba *hba, u8 lun, void __user *buffer)
 		case QUERY_ATTR_IDN_OOO_DATA_EN:
 		case QUERY_ATTR_IDN_BKOPS_STATUS:
 		case QUERY_ATTR_IDN_PURGE_STATUS:
+#if defined(CONFIG_ARCH_SONY_TAMA)
+			index = 0;
+			if (hba->dev_quirks & UFS_DEVICE_QUIRK_NO_PURGE) {
+				err = -EPERM;
+				goto out_release_mem;
+			}
+			break;
+#endif
 		case QUERY_ATTR_IDN_MAX_DATA_IN:
 		case QUERY_ATTR_IDN_MAX_DATA_OUT:
 		case QUERY_ATTR_IDN_REF_CLK_FREQ:
@@ -2361,6 +2369,13 @@ ufs_qcom_query_ioctl(struct ufs_hba *hba, u8 lun, void __user *buffer)
 		case QUERY_FLAG_IDN_PWR_ON_WPE:
 		case QUERY_FLAG_IDN_BKOPS_EN:
 		case QUERY_FLAG_IDN_PURGE_ENABLE:
+#if defined(CONFIG_ARCH_SONY_TAMA)
+			if (hba->dev_quirks & UFS_DEVICE_QUIRK_NO_PURGE) {
+				err = -EPERM;
+				goto out_release_mem;
+			}
+			break;
+#endif
 		case QUERY_FLAG_IDN_FPHYRESOURCEREMOVAL:
 		case QUERY_FLAG_IDN_BUSY_RTC:
 			break;
@@ -2370,6 +2385,23 @@ ufs_qcom_query_ioctl(struct ufs_hba *hba, u8 lun, void __user *buffer)
 		err = ufshcd_query_flag(hba, ioctl_data->opcode,
 					ioctl_data->idn, 0, &flag);
 		break;
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	case UPIU_QUERY_OPCODE_SET_FLAG:
+		switch (ioctl_data->idn) {
+		case QUERY_FLAG_IDN_PURGE_ENABLE:
+			if (hba->dev_quirks & UFS_DEVICE_QUIRK_NO_PURGE) {
+				err = -EPERM;
+				goto out_release_mem;
+			}
+			pm_runtime_disable(&hba->sdev_ufs_device->sdev_gendev);
+			break;
+		default:
+			goto out_einval;
+		}
+		err = ufshcd_query_flag(hba, ioctl_data->opcode,
+				ioctl_data->idn, 0, NULL);
+		break;
+#endif
 	default:
 		goto out_einval;
 	}
@@ -2400,6 +2432,9 @@ ufs_qcom_query_ioctl(struct ufs_hba *hba, u8 lun, void __user *buffer)
 		data_ptr = &flag;
 		break;
 	case UPIU_QUERY_OPCODE_WRITE_ATTR:
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	case UPIU_QUERY_OPCODE_SET_FLAG:
+#endif
 		goto out_release_mem;
 	default:
 		goto out_einval;
@@ -2430,6 +2465,94 @@ out:
 	return err;
 }
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+static int ufshcd_write_buffer(struct ufs_hba *hba, void __user *buffer)
+{
+	int err = 0;
+	unsigned char cmd[11] = {WRITE_BUFFER, 0x0E, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	struct ufs_ioctl_write_buffer_data *ioctl_data = NULL;
+	struct ufs_ioctl_write_buffer_data *fw_data = NULL;
+	struct Scsi_Host *shost = NULL;
+	struct scsi_device *sdev = NULL;
+	unsigned char sense[SCSI_SENSE_BUFFERSIZE];
+	struct scsi_sense_hdr sshdr;
+
+	ioctl_data = kmalloc(sizeof(struct ufs_ioctl_write_buffer_data), GFP_KERNEL);
+	if (!ioctl_data) {
+		dev_err(hba->dev, "%s: Failed allocating ioctl_data\n", __func__);
+		err = -ENOMEM;
+		goto out;
+	}
+
+	err = copy_from_user(ioctl_data, buffer, sizeof(struct ufs_ioctl_write_buffer_data));
+	if (err) {
+		dev_err(hba->dev, "%s: Failed copying ioctl_data from user, err %d\n", __func__, err);
+		goto out;
+	}
+
+	fw_data = kmalloc(sizeof(struct ufs_ioctl_write_buffer_data) + ioctl_data->buf_size, GFP_KERNEL);
+	if (!fw_data) {
+		dev_err(hba->dev, "%s: Failed allocating fw_data\n", __func__);
+		err = -ENOMEM;
+		goto out;
+	}
+
+	err = copy_from_user(fw_data, buffer, sizeof(struct ufs_ioctl_write_buffer_data) + ioctl_data->buf_size);
+	if (err) {
+		dev_err(hba->dev, "%s: Failed copying fw_data from user, err %d\n", __func__, err);
+		goto out;
+	}
+
+	cmd[6] = (ioctl_data->buf_size >> 16) & 0xff;
+	cmd[7] = (ioctl_data->buf_size >> 8) & 0xff;
+	cmd[8] = ioctl_data->buf_size & 0xff;
+
+	shost = scsi_host_lookup(0);
+	if (!shost) {
+		dev_err(hba->dev, "%s: Failed to get scsi_host\n", __func__);
+		err = -ENODEV;
+		goto out;
+	}
+
+	sdev = scsi_device_lookup(shost, 0, 0, 0);
+	if (!sdev) {
+		dev_err(hba->dev, "%s: Failed to get scsi_device\n", __func__);
+		err = -ENODEV;
+		goto out;
+	}
+
+	err = scsi_execute(sdev, cmd, DMA_TO_DEVICE, fw_data->buffer, ioctl_data->buf_size, sense, &sshdr, 10000, 1,
+						REQ_FAILFAST_DEV | REQ_FAILFAST_TRANSPORT | REQ_FAILFAST_DRIVER, 0, NULL);
+	if (err) {
+		dev_err(hba->dev, "%s: Failed write buffer %d\n", __func__, err);
+		goto out;
+	}
+
+	if (scsi_normalize_sense(sense, SCSI_SENSE_BUFFERSIZE, &sshdr)) {
+		dev_err(hba->dev, "%s: print sense hdr\n", __func__);
+		scsi_print_sense_hdr(sdev, "ffu", &sshdr);
+	}
+
+out:
+	if (sdev) {
+		scsi_device_put(sdev);
+	}
+
+	if (shost) {
+		scsi_host_put(shost);
+	}
+
+	if (fw_data) {
+		kfree(fw_data);
+	}
+
+	if (ioctl_data) {
+		kfree(ioctl_data);
+	}
+	return err;
+}
+#endif
+
 /**
  * ufs_qcom_ioctl - ufs ioctl callback registered in scsi_host
  * @dev: scsi device required for per LUN queries
@@ -2459,6 +2582,13 @@ ufs_qcom_ioctl(struct scsi_device *dev, unsigned int cmd, void __user *buffer)
 					   buffer);
 		pm_runtime_put_sync(hba->dev);
 		break;
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	case UFS_IOCTL_WRITE_BUFFER:
+		pm_runtime_get_sync(hba->dev);
+		err = ufshcd_write_buffer(hba, buffer);
+		pm_runtime_put_sync(hba->dev);
+		break;
+#endif
 	default:
 		err = -ENOIOCTLCMD;
 		dev_dbg(hba->dev, "%s: Unsupported ioctl cmd %d\n", __func__,

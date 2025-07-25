@@ -493,4 +493,13 @@ struct ufs_ioctl_query_data {
 	__u8 buffer[0];
 };
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+#define UFS_IOCTL_WRITE_BUFFER			0x53EF
+
+struct ufs_ioctl_write_buffer_data {
+	__u32 buf_size;
+	__u8 buffer[0];
+};
+#endif
+
 #endif /* UFS_QCOM_H_ */

@@ -256,6 +256,17 @@ static struct ufs_dev_fix ufs_fixups[] = {
 		UFS_DEVICE_QUIRK_PA_HIBER8TIME),
 #endif
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	UFS_FIX(UFS_VENDOR_SKHYNIX, UFS_ANY_MODEL,
+		UFS_DEVICE_QUIRK_EXTEND_SYNC_LENGTH),
+	UFS_FIX_REVISION(UFS_VENDOR_SKHYNIX, "hB8aL1",
+		"D001", UFS_DEVICE_QUIRK_NO_PURGE),
+	UFS_FIX_REVISION(UFS_VENDOR_SKHYNIX, "hC8aL1",
+		"D001", UFS_DEVICE_QUIRK_NO_PURGE),
+	UFS_FIX_REVISION(UFS_VENDOR_SAMSUNG, "KLUCG4J1",
+		"0101", UFS_DEVICE_QUIRK_NO_PURGE),
+#endif
+
 	END_FIX
 };
 
@@ -4388,6 +4399,14 @@ static int ufshcd_change_power_mode(struct ufs_hba *hba,
 	ufshcd_dme_set(hba, UIC_ARG_MIB(DME_LocalAFC0ReqTimeOutVal),
 			DL_AFC0ReqTimeOutVal_Default);
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	if (hba->dev_quirks & UFS_DEVICE_QUIRK_EXTEND_SYNC_LENGTH) {
+		ufshcd_dme_set(hba, UIC_ARG_MIB(PA_TX_HS_G1_SYNC_LENGTH), 0x48);
+		ufshcd_dme_set(hba, UIC_ARG_MIB(PA_TX_HS_G2_SYNC_LENGTH), 0x48);
+		ufshcd_dme_set(hba, UIC_ARG_MIB(PA_TX_HS_G3_SYNC_LENGTH), 0x48);
+	}
+#endif
+
 	ret = ufshcd_uic_change_pwr_mode(hba, pwr_mode->pwr_rx << 4
 			| pwr_mode->pwr_tx);
 
@@ -7367,6 +7386,25 @@ void ufshcd_fixup_dev_quirks(struct ufs_hba *hba, struct ufs_dev_fix *fixups)
 	if (!fixups)
 		return;
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	dev_info(hba->dev, "%s : vid=%04x, model=%s, spec ver=%04x, revision=%s\n",
+		__func__, hba->dev_info.wmanufacturerid, dev_info->model,
+		hba->dev_info.wspecversion, dev_info->revision);
+
+	if (hba->dev_info.wspecversion < UFS_PURGE_SPEC_VER)
+		hba->dev_quirks |= UFS_DEVICE_QUIRK_NO_PURGE;
+
+	for (f = fixups; f->quirk; f++) {
+		if ((f->wmanufacturerid == dev_info->wmanufacturerid ||
+		     f->wmanufacturerid == UFS_ANY_VENDOR) &&
+		     ((dev_info->model &&
+		       STR_PRFX_EQUAL(f->model, dev_info->model)) ||
+		      !strncmp(f->model, UFS_ANY_MODEL, strlen(UFS_ANY_MODEL))) &&
+			  (STR_PRFX_EQUAL(f->revision, dev_info->revision) ||
+			  !strncmp(f->revision, UFS_ANY_VER, strlen(UFS_ANY_VER))))
+			hba->dev_quirks |= f->quirk;
+	}
+#else
 	for (f = fixups; f->quirk; f++) {
 		if ((f->wmanufacturerid == dev_info->wmanufacturerid ||
 		     f->wmanufacturerid == UFS_ANY_VENDOR) &&
@@ -7375,6 +7413,7 @@ void ufshcd_fixup_dev_quirks(struct ufs_hba *hba, struct ufs_dev_fix *fixups)
 		      !strcmp(f->model, UFS_ANY_MODEL)))
 			hba->dev_quirks |= f->quirk;
 	}
+#endif
 }
 EXPORT_SYMBOL_GPL(ufshcd_fixup_dev_quirks);
 
@@ -7392,6 +7431,9 @@ static int ufs_get_device_desc(struct ufs_hba *hba)
 	int err;
 	size_t buff_len;
 	u8 model_index;
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	u8 revision_index;
+#endif
 	u8 *desc_buf;
 	struct ufs_dev_info *dev_info = &hba->dev_info;
 
@@ -7430,6 +7472,18 @@ static int ufs_get_device_desc(struct ufs_hba *hba)
 			__func__, err);
 		goto out;
 	}
+
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	revision_index = desc_buf[DEVICE_DESC_PARAM_PRDCT_REV];
+
+	err = ufshcd_read_string_desc(hba, revision_index,
+				      &dev_info->revision, SD_ASCII_STD);
+	if (err < 0) {
+		dev_err(hba->dev, "%s: Failed reading Product Revision. err = %d\n",
+			__func__, err);
+		goto out;
+	}
+#endif
 
 	ufshcd_get_ref_clk_gating_wait(hba);
 

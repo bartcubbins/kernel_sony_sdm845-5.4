@@ -607,6 +607,9 @@ struct ufs_dev_info {
 	u32 d_wb_alloc_units;
 	bool b_rpm_dev_flush_capable;
 	u8 b_presrv_uspc_en;
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	u8 *revision;
+#endif
 };
 
 /**

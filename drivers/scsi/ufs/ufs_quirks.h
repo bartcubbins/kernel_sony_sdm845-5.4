@@ -12,6 +12,11 @@
 #define UFS_ANY_VENDOR 0xFFFF
 #define UFS_ANY_MODEL  "ANY_MODEL"
 
+#if defined(CONFIG_ARCH_SONY_TAMA)
+#define UFS_ANY_VER            "ANY_VER"
+#define UFS_PURGE_SPEC_VER     0x210
+#endif
+
 #define UFS_VENDOR_MICRON      0x12C
 #define UFS_VENDOR_TOSHIBA     0x198
 #define UFS_VENDOR_SAMSUNG     0x1CE
@@ -27,16 +32,35 @@ struct ufs_dev_fix {
 	u16 wmanufacturerid;
 	u8 *model;
 	unsigned int quirk;
+#if defined(CONFIG_ARCH_SONY_TAMA)
+	char *revision;
+#endif
 };
 
 #define END_FIX { }
 
 /* add specific device quirk */
+#if defined(CONFIG_ARCH_SONY_TAMA)
+#define UFS_FIX(_vendor, _model, _quirk) { \
+	.wmanufacturerid = (_vendor),\
+	.model = (_model),		   \
+	.revision = (UFS_ANY_VER),	   \
+	.quirk = (_quirk),		   \
+}
+
+#define UFS_FIX_REVISION(_vendor, _model, _revision, _quirk) { \
+	.wmanufacturerid = (_vendor),\
+	.model = (_model),		   \
+	.revision = (_revision),	   \
+	.quirk = (_quirk),		   \
+}
+#else
 #define UFS_FIX(_vendor, _model, _quirk) { \
 	.wmanufacturerid = (_vendor),\
 	.model = (_model),		   \
 	.quirk = (_quirk),		   \
 }
+#endif
 
 #ifdef CONFIG_SCSI_UFSHCD_QTI
 /*
@@ -173,5 +197,10 @@ struct ufs_dev_fix {
  * suspend flow.
  */
 #define UFS_DEVICE_QUIRK_DELAY_AFTER_LPM        (1 << 11)
+
+#if defined(CONFIG_ARCH_SONY_TAMA)
+#define UFS_DEVICE_QUIRK_EXTEND_SYNC_LENGTH	(1 << 23)
+#define UFS_DEVICE_QUIRK_NO_PURGE			(1 << 24)
+#endif
 
 #endif /* UFS_QUIRKS_H_ */
