@@ -157,10 +157,6 @@
 	qcom,mss_pdc_offset = <9>;
 };
 
-&clock_cpucc {
-	compatible = "qcom,clk-cpu-osm-v2";
-};
-
 &pcie1 {
 	qcom,phy-sequence = <0x1804 0x03 0x0
 				0x00dc 0x27 0x0

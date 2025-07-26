@@ -9,7 +9,6 @@
 #include <dt-bindings/clock/qcom,dispcc-sdm845.h>
 #include <dt-bindings/clock/qcom,gpucc-sdm845.h>
 #include <dt-bindings/clock/qcom,videocc-sdm845.h>
-#include <dt-bindings/clock/qcom,cpucc-sdm845.h>
 #include <dt-bindings/clock/qcom,rpmh.h>
 #include <dt-bindings/clock/qcom,aop-qmp.h>
 #include <dt-bindings/regulator/qcom,rpmh-regulator-levels.h>
@@ -1181,21 +1180,18 @@
 	cpu0_l3: qcom,cpu0-cpu-l3-lat {
 		compatible = "devfreq-simple-dev";
 		clock-names = "devfreq_clk";
-		clocks = <&clock_cpucc L3_CLUSTER0_VOTE_CLK>;
 		governor = "performance";
 	};
 
 	cpu4_l3: qcom,cpu4-cpu-l3-lat {
 		compatible = "devfreq-simple-dev";
 		clock-names = "devfreq_clk";
-		clocks = <&clock_cpucc L3_CLUSTER1_VOTE_CLK>;
 		governor = "performance";
 	};
 
 	cdsp_l3: qcom,cdsp-cdsp-l3-lat {
 		compatible = "devfreq-simple-dev";
 		clock-names = "devfreq_clk";
-		clocks = <&clock_cpucc L3_MISC_VOTE_CLK>;
 		governor = "powersave";
 	};
 
@@ -1281,23 +1277,6 @@
 	cpucc_debug: syscon@17970018 {
 		compatible = "syscon";
 		reg = <0x17970018 0x4>;
-	};
-
-	clock_cpucc: qcom,cpucc@17d41000 {
-		compatible = "qcom,clk-cpu-osm";
-		reg = <0x17d41000 0x1400>,
-			<0x17d43000 0x1400>,
-			<0x17d45800 0x1400>;
-		reg-names = "osm_l3_base", "osm_pwrcl_base", "osm_perfcl_base";
-		vdd_l3_mx_ao-supply = <&pm8998_s6_level_ao>;
-		vdd_pwrcl_mx_ao-supply = <&pm8998_s6_level_ao>;
-
-		qcom,mx-turbo-freq = <1478400000 1689600000 3300000001>;
-		l3-devs = <&cpu0_l3 &cpu4_l3 &cdsp_l3 &msm_gpu>;
-
-		clock-names = "xo_ao";
-		clocks = <&clock_rpmh RPMH_CXO_CLK_A>;
-		#clock-cells = <1>;
 	};
 
 	clock_debug: qcom,cc-debug@100000 {
@@ -4067,9 +4046,7 @@
 		qcom,iommu-dma-addr-pool = <0x10000000 0x40000000>;
 		qcom,smmu-s1-enable;
 	};
-};
 
-&clock_cpucc {
 	lmh_dcvs0: qcom,limits-dcvs@0 {
 		compatible = "qcom,msm-hw-limits";
 		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
