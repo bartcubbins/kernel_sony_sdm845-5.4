@@ -12,6 +12,8 @@
 #include <dt-bindings/clock/qcom,rpmh.h>
 #include <dt-bindings/clock/qcom,aop-qmp.h>
 #include <dt-bindings/regulator/qcom,rpmh-regulator-levels.h>
+#include <dt-bindings/interconnect/qcom,icc.h>
+#include <dt-bindings/interconnect/qcom,sdm845.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/soc/qcom,rpmh-rsc.h>
 #include <dt-bindings/spmi/spmi.h>
@@ -1300,6 +1302,91 @@
 		mbox-names = "qdss_clk";
 	};
 
+	mc_virt: interconnect@0 {
+		compatible = "qcom,sdm845-mc_virt";
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos", "disp";
+		qcom,bcm-voters = <&apps_bcm_voter>, <&disp_bcm_voter>;
+	};
+
+	ipa_virt: interconnect@1 {
+		compatible = "qcom,sdm845-ipa_virt";
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	camnoc_virt: interconnect@2 {
+		compatible = "qcom,sdm845-camnoc_virt";
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	mem_noc: interconnect@1380000 {
+		compatible = "qcom,sdm845-mem_noc";
+		reg = <0x01380000 0x27200>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos", "disp";
+		qcom,bcm-voters = <&apps_bcm_voter>, <&disp_bcm_voter>;
+	};
+
+	dc_noc: interconnect@14e0000 {
+		compatible = "qcom,sdm845-dc_noc";
+		reg = <0x014e0000 0x400>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	config_noc: interconnect@1500000 {
+		compatible = "qcom,sdm845-config_noc";
+		reg = <0x01500000 0x5080>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	system_noc: interconnect@1620000 {
+		compatible = "qcom,sdm845-system_noc";
+		reg = <0x01620000 0x18080>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	aggre1_noc: interconnect@16e0000 {
+		compatible = "qcom,sdm845-aggre1_noc";
+		reg = <0x016e0000 0x15080>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	aggre2_noc: interconnect@1700000 {
+		compatible = "qcom,sdm845-aggre2_noc";
+		reg = <0x01700000 0x1f300>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
+	mmss_noc: interconnect@1740000 {
+		compatible = "qcom,sdm845-mmss_noc";
+		reg = <0x01740000 0x1c100>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos", "disp";
+		qcom,bcm-voters = <&apps_bcm_voter>, <&disp_bcm_voter>;
+	};
+
+	gladiator_noc: interconnect@17900000 {
+		compatible = "qcom,sdm845-gladiator_noc";
+		reg = <0x17900000 0xd080>;
+		#interconnect-cells = <1>;
+		qcom,bcm-voter-names = "hlos";
+		qcom,bcm-voters = <&apps_bcm_voter>;
+	};
+
 	ufsphy_mem: ufsphy_mem@1d87000 {
 		reg = <0x1d87000 0xda8>, <0x1d90000 0x8000>; /* PHY regs */
 		reg-names = "phy_mem", "ufs_ice";
@@ -2224,9 +2311,8 @@
 				<WAKE_TCS      3>,
 				<CONTROL_TCS   1>;
 
-		msm_bus_apps_rsc {
-			compatible = "qcom,msm-bus-rsc";
-			qcom,msm-bus-id = <MSM_BUS_RSC_APPS>;
+		apps_bcm_voter: bcm_voter {
+			compatible = "qcom,bcm-voter";
 		};
 
 		system_pm {
@@ -2252,9 +2338,9 @@
 				<WAKE_TCS    1>,
 				<CONTROL_TCS 1>;
 
-		msm_bus_disp_rsc {
-			compatible = "qcom,msm-bus-rsc";
-			qcom,msm-bus-id = <MSM_BUS_RSC_DISP>;
+		disp_bcm_voter: bcm_voter {
+			compatible = "qcom,bcm-voter";
+			qcom,tcs-wait = <QCOM_ICC_TAG_AMC>;
 		};
 
 		sde_rsc_rpmh {
@@ -4211,7 +4297,6 @@
 #include "sdm845-ion.dtsi"
 #include "sdm845-smp2p.dtsi"
 #include "sdm845-camera.dtsi"
-#include "sdm845-bus.dtsi"
 #include "sdm845-vidc.dtsi"
 #include "sdm845-pm.dtsi"
 #include "sdm845-pinctrl.dtsi"
