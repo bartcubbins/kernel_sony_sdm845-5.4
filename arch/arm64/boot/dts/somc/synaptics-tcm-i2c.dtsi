@@ -3,6 +3,7 @@
  * Copyright (C) 2017 Synaptics Incorporated. All rights reserved.
  * Copyright (C) 2017 Scott Lin <scott.lin@tw.synaptics.com>
  * Copyright (C) 2017-2018 Sony Mobile Communications Inc.
+ * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 &qupv3_se5_i2c {
