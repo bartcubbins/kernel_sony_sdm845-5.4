@@ -206,6 +206,19 @@
 		qcom,sde-reg-dma-version = <0x1>;
 		qcom,sde-reg-dma-trigger-off = <0x119c>;
 
+		/* data and reg bus scale settings */
+		interconnects =
+			<&mmss_noc MASTER_MDP_PORT0 &mc_virt SLAVE_EBI1>,
+			<&mmss_noc MASTER_MDP_PORT1 &mc_virt SLAVE_EBI1>,
+			<&gladiator_noc MASTER_AMPSS_M0 &config_noc SLAVE_DISPLAY_CFG>;
+		interconnect-names = "qcom,sde-data-bus0",
+			"qcom,sde-data-bus1", "qcom,sde-reg-bus";
+
+		qcom,sde-reg-bus,vectors-KBps = <0 0>,
+			<0 76800>,
+			<0 150000>,
+			<0 300000>;
+
 		qcom,sde-sspp-vig-blocks {
 			qcom,sde-vig-csc-off = <0x1a00>;
 			qcom,sde-vig-qseed-off = <0xa00>;
@@ -242,29 +255,6 @@
 			qcom,iommu-faults = "non-fatal";
 			qcom,iommu-vmid = <0xa>; /* VMID_CP_PIXEL */
 		};
-
-		/* data and reg bus scale settings */
-		qcom,sde-data-bus {
-			qcom,msm-bus,name = "mdss_sde";
-			qcom,msm-bus,num-cases = <3>;
-			qcom,msm-bus,num-paths = <2>;
-			qcom,msm-bus,vectors-KBps =
-				<22 512 0 0>, <23 512 0 0>,
-				<22 512 0 6400000>, <23 512 0 6400000>,
-				<22 512 0 6400000>, <23 512 0 6400000>;
-		};
-
-		qcom,sde-reg-bus {
-			qcom,msm-bus,name = "mdss_reg";
-			qcom,msm-bus,num-cases = <4>;
-			qcom,msm-bus,num-paths = <1>;
-			qcom,msm-bus,active-only;
-			qcom,msm-bus,vectors-KBps =
-				<1 590 0 0>,
-				<1 590 0 76800>,
-				<1 590 0 150000>,
-				<1 590 0 300000>;
-		};
 	};
 
 	sde_rscc: qcom,sde_rscc@af20000 {
@@ -284,38 +274,14 @@
 		qcom,sde-dram-channels = <2>;
 
 		/* data and reg bus scale settings */
-		qcom,sde-data-bus {
-			qcom,msm-bus,name = "disp_rsc_mnoc";
-			qcom,msm-bus,active-only;
-			qcom,msm-bus,num-cases = <3>;
-			qcom,msm-bus,num-paths = <2>;
-			qcom,msm-bus,vectors-KBps =
-			    <20003 20515 0 0>, <20004 20515 0 0>,
-			    <20003 20515 0 6400000>, <20004 20515 0 6400000>,
-			    <20003 20515 0 6400000>, <20004 20515 0 6400000>;
-		};
-
-		qcom,sde-llcc-bus {
-			qcom,msm-bus,name = "disp_rsc_llcc";
-			qcom,msm-bus,active-only;
-			qcom,msm-bus,num-cases = <3>;
-			qcom,msm-bus,num-paths = <1>;
-			qcom,msm-bus,vectors-KBps =
-			    <20001 20513 0 0>,
-			    <20001 20513 0 6400000>,
-			    <20001 20513 0 6400000>;
-		};
-
-		qcom,sde-ebi-bus {
-			qcom,msm-bus,name = "disp_rsc_ebi";
-			qcom,msm-bus,active-only;
-			qcom,msm-bus,num-cases = <3>;
-			qcom,msm-bus,num-paths = <1>;
-			qcom,msm-bus,vectors-KBps =
-			    <20000 20512 0 0>,
-			    <20000 20512 0 6400000>,
-			    <20000 20512 0 6400000>;
-		};
+		qcom,msm-bus,active-only;
+		interconnects =
+			<&mmss_noc MASTER_MDP_PORT0_DISP &mmss_noc SLAVE_MNOC_HF_MEM_NOC_DISP>,
+			<&mmss_noc MASTER_MDP_PORT1_DISP &mmss_noc SLAVE_MNOC_HF_MEM_NOC_DISP>,
+			<&mem_noc MASTER_MNOC_HF_MEM_NOC_DISP &mem_noc SLAVE_LLCC_DISP>,
+			<&mc_virt MASTER_LLCC_DISP &mc_virt SLAVE_EBI1_DISP>;
+		interconnect-names = "qcom,sde-data-bus0", "qcom,sde-data-bus1",
+			"qcom,sde-llcc-bus", "qcom,sde-ebi-bus";
 	};
 
 	mdss_rotator: qcom,mdss_rotator@ae00000 {
@@ -330,14 +296,13 @@
 		qcom,mdss-rot-mode = <1>;
 		qcom,mdss-highest-bank-bit = <0x2>;
 
-		/* Bus Scale Settings */
-		qcom,msm-bus,name = "mdss_rotator";
-		qcom,msm-bus,num-cases = <3>;
-		qcom,msm-bus,num-paths = <1>;
-		qcom,msm-bus,vectors-KBps =
-			<25 512 0 0>,
-			<25 512 0 6400000>,
-			<25 512 0 6400000>;
+		/* data and reg bus scale settings */
+		qcom,msm-bus,active-only;
+		interconnects =
+			<&mmss_noc MASTER_ROTATOR &mc_virt SLAVE_EBI1>,
+			<&gladiator_noc MASTER_AMPSS_M0 &config_noc SLAVE_DISPLAY_CFG>;
+		interconnect-names = "qcom,rot-data-bus0",
+			"qcom,sde-reg-bus";
 
 		rot-vdd-supply = <&mdss_core_gdsc>;
 		qcom,supply-names = "rot-vdd";
@@ -377,17 +342,6 @@
 		qcom,mdss-sbuf-headroom = <20>;
 
 		cache-slice-names = "rotator";
-
-		/* reg bus scale settings */
-		rot_reg: qcom,rot-reg-bus {
-			qcom,msm-bus,name = "mdss_rot_reg";
-			qcom,msm-bus,num-cases = <2>;
-			qcom,msm-bus,num-paths = <1>;
-			qcom,msm-bus,active-only;
-			qcom,msm-bus,vectors-KBps =
-				<1 590 0 0>,
-				<1 590 0 76800>;
-		};
 
 		smmu_rot_unsec: qcom,smmu_rot_unsec_cb {
 			compatible = "qcom,smmu_sde_rot_unsec";

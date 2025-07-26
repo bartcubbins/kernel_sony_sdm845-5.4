@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
-
-#include <dt-bindings/msm/msm-bus-ids.h>
 
 &soc {
 	/* QUPv3 South instances */
 	qupv3_0: qcom,qupv3_0_geni_se@8c0000 {
 		compatible = "qcom,qupv3-geni-se";
 		reg = <0x8c0000 0x6000>;
-		qcom,bus-mas-id = <MSM_BUS_MASTER_BLSP_1>;
-		qcom,bus-slv-id = <MSM_BUS_SLAVE_EBI_CH0>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,msm-bus,vectors-bus-ids =
+				<MASTER_BLSP_1 SLAVE_EBI1>;
 		iommus = <&apps_smmu 0x003 0x0>;
 		qcom,iommu-dma-addr-pool = <0x40000000 0xc0000000>;
 		qcom,iommu-dma = "fastmap";
@@ -402,8 +401,9 @@
 	qupv3_1: qcom,qupv3_1_geni_se@ac0000 {
 		compatible = "qcom,qupv3-geni-se";
 		reg = <0xac0000 0x6000>;
-		qcom,bus-mas-id = <MSM_BUS_MASTER_BLSP_2>;
-		qcom,bus-slv-id = <MSM_BUS_SLAVE_EBI_CH0>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,msm-bus,vectors-bus-ids =
+				<MASTER_BLSP_2 SLAVE_EBI1>;
 		iommus = <&apps_smmu 0x6c3 0x0>;
 		qcom,iommu-dma-addr-pool = <0x40000000 0xc0000000>;
 		qcom,iommu-dma = "fastmap";

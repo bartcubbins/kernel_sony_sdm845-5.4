@@ -5,7 +5,6 @@
  */
 
 #include <dt-bindings/clock/qcom,gcc-sdm845.h>
-#include <dt-bindings/msm/msm-bus-ids.h>
 
 &soc {
 	/* Primary USB port related DWC3 controller */
@@ -61,18 +60,20 @@
 		resets = <&clock_gcc GCC_USB30_PRIM_BCR>;
 		reset-names = "core_reset";
 
-		qcom,msm-bus,name = "usb0";
-		qcom,msm-bus,num-cases = <2>;
-		qcom,msm-bus,num-paths = <3>;
-		qcom,msm-bus,vectors-KBps =
-			<MSM_BUS_MASTER_USB3 MSM_BUS_SLAVE_EBI_CH0 0 0>,
-			<MSM_BUS_MASTER_USB3 MSM_BUS_SLAVE_IPA_CFG 0 0>,
-			<MSM_BUS_MASTER_AMPSS_M0 MSM_BUS_SLAVE_USB3 0 0>,
-			<MSM_BUS_MASTER_USB3
-				MSM_BUS_SLAVE_EBI_CH0 240000 700000>,
-			<MSM_BUS_MASTER_USB3
-				MSM_BUS_SLAVE_IPA_CFG 0 2400>,
-			<MSM_BUS_MASTER_AMPSS_M0 MSM_BUS_SLAVE_USB3 0 40000>;
+		interconnects = <&aggre2_noc MASTER_USB3_0 &mc_virt SLAVE_EBI1>,
+				<&aggre2_noc MASTER_USB3_0 &config_noc SLAVE_IPA_CFG>,
+				<&gladiator_noc MASTER_AMPSS_M0 &config_noc SLAVE_USB3_0>;
+		interconnect-names = "usb-ddr", "usb-ipa", "ddr-usb";
+
+		qcom,interconnect-values-nom = /* NOMINAL Votes */
+						<240000 700000>,
+						<0 2400>,
+						<0 40000>;
+
+		qcom,interconnect-values-svs = /* SVS Votes */
+						<240000 700000>,
+						<0 2400>,
+						<0 40000>;
 
 		dwc3@a600000 {
 			compatible = "snps,dwc3";
@@ -398,15 +399,17 @@
 		reset-names = "core_reset";
 		status = "disabled";
 
-		qcom,msm-bus,name = "usb1";
-		qcom,msm-bus,num-cases = <2>;
-		qcom,msm-bus,num-paths = <2>;
-		qcom,msm-bus,vectors-KBps =
-			<MSM_BUS_MASTER_USB3_1 MSM_BUS_SLAVE_EBI_CH0 0 0>,
-			<MSM_BUS_MASTER_AMPSS_M0 MSM_BUS_SLAVE_USB3_1 0 0>,
-			<MSM_BUS_MASTER_USB3_1
-				MSM_BUS_SLAVE_EBI_CH0 240000 700000>,
-			<MSM_BUS_MASTER_AMPSS_M0 MSM_BUS_SLAVE_USB3_1 0 40000>;
+		interconnects = <&aggre2_noc MASTER_USB3_1 &mc_virt SLAVE_EBI1>,
+				<&gladiator_noc MASTER_AMPSS_M0 &config_noc SLAVE_USB3_1>;
+		interconnect-names = "usb-ddr", "ddr-usb";
+
+		qcom,interconnect-values-nom = /* NOMINAL Votes */
+						<240000 700000>,
+						<0 40000>;
+
+		qcom,interconnect-values-svs = /* SVS Votes */
+						<240000 700000>,
+						<0 40000>;
 
 		dwc3@a800000 {
 			compatible = "snps,dwc3";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 #include <dt-bindings/clock/qcom,gcc-sdm845.h>
@@ -226,12 +226,9 @@
 			<0xe00 &apps_smmu 0x1c1e 0x1>,
 			<0xf00 &apps_smmu 0x1c1f 0x1>;
 
-		qcom,msm-bus,name = "pcie0";
-		qcom,msm-bus,num-cases = <2>;
-		qcom,msm-bus,num-paths = <1>;
-		qcom,msm-bus,vectors-KBps =
-				<45 512 0 0>,
-				<45 512 500 800>;
+		interconnects = <&aggre1_noc MASTER_PCIE_0
+				&mc_virt SLAVE_EBI1>;
+		interconnect-names = "icc_path";
 
 		clocks = <&clock_gcc GCC_PCIE_0_PIPE_CLK>,
 			<&clock_rpmh RPMH_CXO_CLK>,
@@ -507,12 +504,9 @@
 			<0xe00 &apps_smmu 0x1c0e 0x1>,
 			<0xf00 &apps_smmu 0x1c0f 0x1>;
 
-		qcom,msm-bus,name = "pcie1";
-		qcom,msm-bus,num-cases = <2>;
-		qcom,msm-bus,num-paths = <1>;
-		qcom,msm-bus,vectors-KBps =
-				<100 512 0 0>,
-				<100 512 500 800>;
+		interconnects = <&aggre2_noc MASTER_PCIE_1
+				&mc_virt SLAVE_EBI1>;
+		interconnect-names = "icc_path";
 
 		clocks = <&clock_gcc GCC_PCIE_1_PIPE_CLK>,
 			<&clock_rpmh RPMH_CXO_CLK>,
