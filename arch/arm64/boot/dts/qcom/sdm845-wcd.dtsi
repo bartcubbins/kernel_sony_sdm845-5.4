@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 &slim_aud {
 	tavil_codec {
 		wcd: wcd_pinctrl@5 {
 			compatible = "qcom,wcd-pinctrl";
-			qcom,num-gpios = <5>;
+			qcom,gpios-num = <5>;
 			gpio-controller;
 			#gpio-cells = <2>;
 
