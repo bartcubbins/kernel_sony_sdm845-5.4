@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2017, 2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 #include <dt-bindings/spmi/spmi.h>
 #include <dt-bindings/interrupt-controller/irq.h>
-#include <dt-bindings/thermal/thermal.h>
+#include <dt-bindings/thermal/thermal_qti.h>
 
 &spmi_bus {
 	#address-cells = <2>;

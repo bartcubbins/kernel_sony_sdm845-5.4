@@ -63,7 +63,7 @@
 			compatible = "qcom,spmi-temp-alarm";
 			reg = <0x2400 0x100>;
 			interrupts = <0x0 0x24 0x0 IRQ_TYPE_EDGE_RISING>;
-			io-channels = <&pm8998_vadc ADC_DIE_TEMP>;
+			io-channels = <&pm8998_vadc ADC5_DIE_TEMP>;
 			io-channel-names = "thermal";
 			#thermal-sensor-cells = <0>;
 			qcom,temperature-threshold-set = <1>;
@@ -130,19 +130,19 @@
 			/* Channel nodes */
 			ref_gnd@0 {
 				label = "ref_gnd";
-				reg = <ADC_REF_GND>;
+				reg = <ADC5_REF_GND>;
 				qcom,pre-scaling = <1 1>;
 			};
 
 			vref_1p25@1 {
 				label = "vref_1p25";
-				reg = <ADC_1P25VREF>;
+				reg = <ADC5_1P25VREF>;
 				qcom,pre-scaling = <1 1>;
 			};
 
 			die_temp@6 {
 				label = "die_temp";
-				reg = <ADC_DIE_TEMP>;
+				reg = <ADC5_DIE_TEMP>;
 				qcom,pre-scaling = <1 1>;
 			};
 		};
