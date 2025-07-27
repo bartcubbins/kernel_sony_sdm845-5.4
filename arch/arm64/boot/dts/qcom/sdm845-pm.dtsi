@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 &soc {
@@ -14,33 +14,38 @@
 			reg = <0>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-			label = "L3";
+			idle-state-name = "L3";
 			qcom,clstr-tmr-add = <1000>;
 			qcom,psci-mode-shift = <4>;
 			qcom,psci-mode-mask = <0xfff>;
 
-			qcom,pm-cluster-level@0 { /* D1 */
+			CLUSTER_WFI: qcom,pm-cluster-level@0 { /* D1 */
 				reg = <0>;
-				label = "l3-wfi";
+				compatible = "arm,idle-state";
+				idle-state-name = "l3-wfi";
 				qcom,psci-mode = <0x1>;
-				qcom,entry-latency-us = <48>;
-				qcom,exit-latency-us = <51>;
-				qcom,min-residency-us = <99>;
+				entry-latency-us = <48>;
+				exit-latency-us = <51>;
+				min-residency-us = <99>;
+				arm,psci-suspend-param = <0x10>;
 			};
 
-			qcom,pm-cluster-level@1 { /* LLCC off, AOSS sleep */
+			LLCC_OFF: qcom,pm-cluster-level@1 { /* AOSS sleep */
 				reg = <1>;
-				label = "llcc-off";
+				compatible = "arm,idle-state";
+				idle-state-name = "llcc-off";
 				qcom,psci-mode = <0xC24>;
-				qcom,entry-latency-us = <1562>;
-				qcom,exit-latency-us = <6562>;
-				qcom,min-residency-us = <9987>;
-				qcom,min-child-idx = <2>;
+				entry-latency-us = <1562>;
+				exit-latency-us = <6562>;
+				min-residency-us = <9987>;
 				qcom,is-reset;
 				qcom,notify-rpm;
+				qcom,min-child-idx = <2>;
+				arm,psci-suspend-param = <0xC240>;
 			};
 
 			qcom,pm-cpu@0 {
+				reg = <0>;
 				#address-cells = <1>;
 				#size-cells = <0>;
 				qcom,psci-mode-shift = <0>;
@@ -48,41 +53,51 @@
 				qcom,ref-stddev = <500>;
 				qcom,tmr-add = <1000>;
 				qcom,ref-premature-cnt = <1>;
+				qcom,disable-ipi-prediction;
 				qcom,cpu = <&CPU0 &CPU1 &CPU2 &CPU3>;
 
-				qcom,pm-cpu-level@0 { /* C1 */
+				SLVR_WFI: qcom,pm-cpu-level@0 { /* C1 */
 					reg = <0>;
-					label = "wfi";
+					compatible = "arm,idle-state";
+					idle-state-name = "wfi";
 					qcom,psci-cpu-mode = <0x1>;
-					qcom,entry-latency-us = <57>;
-					qcom,exit-latency-us = <43>;
-					qcom,min-residency-us = <100>;
+					entry-latency-us = <57>;
+					exit-latency-us = <43>;
+					min-residency-us = <100>;
+					arm,psci-suspend-param = <0x1>;
 				};
 
-				qcom,pm-cpu-level@1 {  /* C3 */
+				SLVR_PC: qcom,pm-cpu-level@1 {  /* C3 */
 					reg = <1>;
-					label = "pc";
+					compatible = "arm,idle-state";
+					idle-state-name = "pc";
 					qcom,psci-cpu-mode = <0x3>;
-					qcom,entry-latency-us = <39>;
-					qcom,exit-latency-us = <461>;
-					qcom,min-residency-us = <5990>;
+					entry-latency-us = <39>;
+					exit-latency-us = <461>;
+					min-residency-us = <5990>;
 					qcom,is-reset;
 					qcom,use-broadcast-timer;
+					local-timer-stop;
+					arm,psci-suspend-param = <0x40000003>;
 				};
 
-				qcom,pm-cpu-level@2 {  /* C4 */
+				SLVR_RAIL_OFF: qcom,pm-cpu-level@2 {  /* C4 */
 					reg = <2>;
-					label = "rail-pc";
+					compatible = "arm,idle-state";
+					idle-state-name = "rail-pc";
 					qcom,psci-cpu-mode = <0x4>;
-					qcom,entry-latency-us = <69>;
-					qcom,exit-latency-us = <531>;
-					qcom,min-residency-us = <3934>;
+					entry-latency-us = <69>;
+					exit-latency-us = <531>;
+					min-residency-us = <3934>;
 					qcom,is-reset;
 					qcom,use-broadcast-timer;
+					local-timer-stop;
+					arm,psci-suspend-param = <0x40000004>;
 				};
 			};
 
 			qcom,pm-cpu@1 {
+				reg = <1>;
 				#address-cells = <1>;
 				#size-cells = <0>;
 				qcom,psci-mode-shift = <0>;
@@ -92,35 +107,43 @@
 				qcom,ref-premature-cnt = <3>;
 				qcom,cpu = <&CPU4 &CPU5 &CPU6 &CPU7>;
 
-				qcom,pm-cpu-level@0 { /* C1 */
+				GOLD_WFI: qcom,pm-cpu-level@0 { /* C1 */
 					reg = <0>;
-					label = "wfi";
+					compatible = "arm,idle-state";
+					idle-state-name = "wfi";
 					qcom,psci-cpu-mode = <0x1>;
-					qcom,entry-latency-us = <40>;
-					qcom,exit-latency-us = <43>;
-					qcom,min-residency-us = <83>;
+					entry-latency-us = <40>;
+					exit-latency-us = <43>;
+					min-residency-us = <83>;
+					arm,psci-suspend-param = <0x1>;
 				};
 
-				qcom,pm-cpu-level@1 {  /* C3 */
+				GOLD_PC: qcom,pm-cpu-level@1 {  /* C3 */
 					reg = <1>;
-					label = "pc";
+					compatible = "arm,idle-state";
+					idle-state-name = "pc";
 					qcom,psci-cpu-mode = <0x3>;
-					qcom,entry-latency-us = <264>;
-					qcom,exit-latency-us = <621>;
-					qcom,min-residency-us = <1001>;
+					entry-latency-us = <264>;
+					exit-latency-us = <621>;
+					min-residency-us = <1001>;
 					qcom,is-reset;
 					qcom,use-broadcast-timer;
+					local-timer-stop;
+					arm,psci-suspend-param = <0x40000003>;
 				};
 
-				qcom,pm-cpu-level@2 {  /* C4 */
+				GOLD_RAIL_OFF: qcom,pm-cpu-level@2 {  /* C4 */
 					reg = <2>;
-					label = "rail-pc";
+					compatible = "arm,idle-state";
+					idle-state-name = "rail-pc";
 					qcom,psci-cpu-mode = <0x4>;
-					qcom,entry-latency-us = <61>;
-					qcom,exit-latency-us = <1061>;
-					qcom,min-residency-us = <1001>;
+					entry-latency-us = <61>;
+					exit-latency-us = <1061>;
+					min-residency-us = <1001>;
 					qcom,is-reset;
 					qcom,use-broadcast-timer;
+					local-timer-stop;
+					arm,psci-suspend-param = <0x40000004>;
 				};
 			};
 		};
