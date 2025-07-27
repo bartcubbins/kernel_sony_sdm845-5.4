@@ -107,10 +107,12 @@
 				reg = <0>;
 				coresight-name = "coresight-gfx";
 				coresight-atid = <50>;
-				port {
-					gfx_out_funnel_in2: endpoint {
-						remote-endpoint =
-						  <&funnel_in2_in_gfx>;
+				out-ports {
+					port {
+						gfx_out_funnel_in2: endpoint {
+							remote-endpoint =
+							  <&funnel_in2_in_gfx>;
+						};
 					};
 				};
 			};
@@ -119,10 +121,12 @@
 				reg = <1>;
 				coresight-name = "coresight-gfx-cx";
 				coresight-atid = <51>;
-				port {
-					gfx_cx_out_funnel_in2: endpoint {
-						remote-endpoint =
-						  <&funnel_in2_in_gfx_cx>;
+				out-ports {
+					port {
+						gfx_cx_out_funnel_in2: endpoint {
+							remote-endpoint =
+							  <&funnel_in2_in_gfx_cx>;
+						};
 					};
 				};
 			};
