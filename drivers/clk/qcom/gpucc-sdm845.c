@@ -754,11 +754,17 @@ static int gpu_cc_gfx_sdm845_probe(struct platform_device *pdev)
 	return ret;
 }
 
+static void gpu_cc_gfx_sdm845_sync_state(struct device *dev)
+{
+	qcom_cc_sync_state(dev, &gpu_cc_gfx_sdm845_desc);
+}
+
 static struct platform_driver gpu_cc_gfx_sdm845_driver = {
 	.probe = gpu_cc_gfx_sdm845_probe,
 	.driver = {
 		.name = "gfxcc-sdm845",
 		.of_match_table = gpu_cc_gfx_sdm845_match_table,
+		.sync_state = gpu_cc_gfx_sdm845_sync_state,
 	},
 };
 
@@ -807,11 +813,17 @@ static int gpu_cc_sdm845_probe(struct platform_device *pdev)
 	return ret;
 }
 
+static void gpu_cc_sdm845_sync_state(struct device *dev)
+{
+	qcom_cc_sync_state(dev, &gpu_cc_sdm845_desc);
+}
+
 static struct platform_driver gpu_cc_sdm845_driver = {
 	.probe = gpu_cc_sdm845_probe,
 	.driver = {
 		.name = "gpu_cc-sdm845",
 		.of_match_table = gpu_cc_sdm845_match_table,
+		.sync_state = gpu_cc_sdm845_sync_state,
 	},
 };
 

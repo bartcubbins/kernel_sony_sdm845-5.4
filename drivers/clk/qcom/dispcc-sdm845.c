@@ -1196,11 +1196,17 @@ static int disp_cc_sdm845_probe(struct platform_device *pdev)
 	return ret;
 }
 
+static void disp_cc_sdm845_sync_state(struct device *dev)
+{
+	qcom_cc_sync_state(dev, &disp_cc_sdm845_desc);
+}
+
 static struct platform_driver disp_cc_sdm845_driver = {
 	.probe		= disp_cc_sdm845_probe,
 	.driver		= {
 		.name	= "disp_cc-sdm845",
 		.of_match_table = disp_cc_sdm845_match_table,
+		.sync_state = disp_cc_sdm845_sync_state,
 	},
 };
 
