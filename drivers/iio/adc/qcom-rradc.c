@@ -703,7 +703,7 @@ static bool rradc_is_batt_psy_available(struct rradc_chip *chip)
 	return true;
 }
 
-bool is_chan_valid(struct rradc_chip *chip,
+static bool is_chan_valid(struct rradc_chip *chip,
 		enum rradc_ext_iio_channels chan)
 {
 	int rc;
