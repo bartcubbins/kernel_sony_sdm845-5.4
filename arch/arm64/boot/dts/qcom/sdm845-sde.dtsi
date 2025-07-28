@@ -431,8 +431,15 @@
 		compatible = "qcom,dsi-phy-v3.0";
 		label = "dsi-phy-0";
 		cell-index = <0>;
-		reg = <0xae94400 0x7c0>;
-		reg-names = "dsi_phy";
+		#clock-cells = <1>;
+		reg = <0xae94400 0x7c0>,
+			<0xae94a00 0x1e0>,
+			<0xaf03000 0x8>;
+		reg-names = "dsi_phy", "pll_base", "gdsc_base";
+		pll-label = "dsi_pll_10nm";
+
+		qcom,dsi-pll-ssc-en;
+		qcom,dsi-pll-ssc-mode = "down-spread";
 
 		vdda-0p9-supply = <&pm8998_l1>;
 		qcom,platform-strength-ctrl = [55 03
@@ -464,8 +471,15 @@
 		compatible = "qcom,dsi-phy-v3.0";
 		label = "dsi-phy-1";
 		cell-index = <1>;
-		reg = <0xae96400 0x7c0>;
-		reg-names = "dsi_phy";
+		#clock-cells = <1>;
+		reg = <0xae96400 0x7c0>,
+			<0xae96a00 0x1e0>,
+			<0xaf03000 0x8>;
+		reg-names = "dsi_phy", "pll_base", "gdsc_base";
+		pll-label = "dsi_pll_10nm";
+
+		qcom,dsi-pll-ssc-en;
+		qcom,dsi-pll-ssc-mode = "down-spread";
 
 		vdda-0p9-supply = <&pm8998_l1>;
 		qcom,platform-strength-ctrl = [55 03
@@ -495,6 +509,7 @@
 
 	sde_dp: qcom,dp_display@0{
 		cell-index = <0>;
+		#clock-cells = <1>;
 		compatible = "qcom,dp-display";
 
 		vdda-1p2-supply = <&pm8998_l26>;
@@ -531,7 +546,7 @@
 			 <&clock_dispcc DISP_CC_MDSS_DP_PIXEL_CLK>,
 			 <&clock_dispcc DISP_CC_MDSS_DP_CRYPTO_CLK>,
 			 <&clock_dispcc DISP_CC_MDSS_DP_PIXEL_CLK_SRC>,
-			 <&mdss_dp_pll DP_PHY_PLL_VCO_DIV_CLK>;
+			 <&sde_dp DP_VCO_DIVIDED_CLK_SRC_MUX>;
 		clock-names = "core_aux_clk", "core_usb_ref_clk_src",
 			"core_usb_ref_clk", "core_usb_cfg_ahb_clk",
 			"core_usb_pipe_clk", "ctrl_link_clk",
