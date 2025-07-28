@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2022, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021-2022, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 &soc {
@@ -80,9 +80,12 @@
 	qcom,dsi-ctrl = <&mdss_dsi0>;
 	qcom,dsi-phy = <&mdss_dsi_phy0>;
 
-	clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-		<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-	clock-names = "mux_byte_clk0", "mux_pixel_clk0";
+	clocks = <&mdss_dsi_phy0 BYTECLK_MUX_0_CLK>,
+			 <&mdss_dsi_phy0 PCLK_MUX_0_CLK>,
+			 <&mdss_dsi_phy0 BYTECLK_SRC_0_CLK>,
+			 <&mdss_dsi_phy0 PCLK_SRC_0_CLK>;
+	clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+			 "src_byte_clk0", "src_pixel_clk0";
 
 	pinctrl-names = "panel_active", "panel_suspend",
 			"somc_ts_int_active", "somc_ts_int_suspend";
