@@ -5,6 +5,7 @@
  */
 
 #include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/iio/qti_power_supply_iio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/thermal/thermal_qti.h>
 
@@ -270,6 +271,8 @@
 			#size-cells = <0>;
 			#io-channel-cells = <1>;
 			qcom,pmic-revid = <&pmi8998_revid>;
+			io-channels = <&pmi8998_fg PSY_IIO_FG_RESET_CLOCK>;
+			io-channel-names = "fg_reset_clock";
 		};
 
 		pmi8998_fg: qpnp,fg {
