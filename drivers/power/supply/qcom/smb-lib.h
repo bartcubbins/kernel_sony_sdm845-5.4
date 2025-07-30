@@ -21,6 +21,9 @@ enum print_reason {
 	PR_MISC		= BIT(2),
 	PR_PARALLEL	= BIT(3),
 	PR_OTG		= BIT(4),
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	PR_SOMC		= BIT(15),
+#endif
 };
 
 #define DEFAULT_VOTER			"DEFAULT_VOTER"
@@ -69,6 +72,21 @@ enum print_reason {
 #define FG_ESR_VOTER			"FG_ESR_VOTER"
 #define FCC_STEPPER_VOTER		"FCC_STEPPER_VOTER"
 #define PD_NOT_SUPPORTED_VOTER		"PD_NOT_SUPPORTED_VOTER"
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+#define PRODUCT_VOTER			"PRODUCT_VOTER"
+#define HIGH_VOLTAGE_VOTER		"HIGH_VOLTAGE_VOTER"
+#define WIRELESS_VOTER			"WIRELESS_VOTER"
+#define SOMC_JEITA_VOTER		"SOMC_JEITA_VOTER"
+#define LOW_BATT_EN_VOTER		"LOW_BATT_EN_VOTER"
+#define BATTCHG_SMART_EN_VOTER		"BATTCHG_SMART_EN_VOTER"
+#define BATTCHG_LRC_EN_VOTER		"BATTCHG_LRC_EN_VOTER"
+#define LRC_OVER_SOC_EN_VOTER		"LRC_OVER_SOC_EN_VOTER"
+#define QNS_VOTER			"QNS_VOTER"
+#define DC_ICL_VOTER			"DC_ICL_VOTER"
+#define DC_OV_BY_PLUGIN_VOTER		"DC_OV_BY_PLUGIN_VOTER"
+#define DC_OV_BY_OTG_VOTER		"DC_OV_BY_OTG_VOTER"
+#endif
 
 #define VCONN_MAX_ATTEMPTS	3
 #define OTG_MAX_ATTEMPTS	3
@@ -148,6 +166,20 @@ struct smb_irq_info {
 	int				irq;
 };
 
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+enum somc_lrc_status {
+	LRC_DISABLE,
+	LRC_CHG_OFF,
+	LRC_CHG_ON,
+};
+
+enum somc_running_status {
+	RUNNING_STATUS_NORMAL,
+	RUNNING_STATUS_OFF_CHARGE,
+	RUNNING_STATUS_SHUTDOWN,
+};
+#endif
+
 static const unsigned int smblib_extcon_cable[] = {
 	EXTCON_USB,
 	EXTCON_USB_HOST,
@@ -223,6 +255,11 @@ struct smb_iio {
 	struct iio_channel	*connector_temp_thr1_chan;
 	struct iio_channel	*connector_temp_thr2_chan;
 	struct iio_channel	*connector_temp_thr3_chan;
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	struct iio_channel	*skin_temp_chan;
+	struct iio_channel	*dcin_i_chan;
+	struct iio_channel	*dcin_v_chan;
+#endif
 };
 
 struct reg_info {
@@ -237,6 +274,13 @@ enum pmic_type {
 	PMI8998,
 	PM660,
 };
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+struct somc_wake_lock {
+	struct wakeup_source	*lock;
+	bool			enabled;
+};
+#endif
 
 struct smb_charger {
 	struct device		*dev;
@@ -326,8 +370,10 @@ struct smb_charger {
 	bool			system_suspend_supported;
 	int			boost_threshold_ua;
 	int			system_temp_level;
+#if !defined(CONFIG_SOMC_CHARGER_EXTENSION)
 	int			thermal_levels;
 	int			*thermal_mitigation;
+#endif
 	int			dcp_icl_ua;
 	int			fake_capacity;
 	int			fake_batt_status;
@@ -386,6 +432,119 @@ struct smb_charger {
 	int			pulse_cnt;
 
 	int			die_health;
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	/* locks */
+	struct mutex		thermal_lock;
+	struct mutex		legacy_detection_lock;
+
+	/* power supplies */
+	struct power_supply	*wireless_psy;
+
+	/* cached status */
+	int			*thermal_fcc_ua;
+	int			*thermal_lo_volt_icl_ua;
+	int			*thermal_hi_volt_icl_ua;
+	int			*thermal_dcin_icl_ua;
+	int			*thermal_wireless_v_limit;
+	int			thermal_fcc_levels;
+	int			thermal_lo_volt_icl_levels;
+	int			thermal_hi_volt_icl_levels;
+	int			thermal_dcin_icl_levels;
+	int			thermal_wireless_v_limit_levels;
+	int			fake_charging_temp_level;
+	int			product_icl_ua;
+	int			high_voltage_icl_ua;
+	int			somc_hvdcp_disable_by_dt;
+
+	/* workaround flag */
+	int			status_before_typec_en_dis_active;
+
+	/* battery profile */
+	int			last_batt_profile_fv_uv;
+
+	/* qnovo */
+	bool			duration_fake_charging;
+	struct work_struct	fake_charging_work;
+
+	bool			thermal_fake_charging;
+	struct work_struct	thermal_fake_charging_work;
+
+	/* jeita */
+	struct delayed_work	jeita_work;
+	bool			jeita_sw_ctl_en;
+	bool			jeita_use_aux;
+	bool			jeita_use_wlc;
+	int			jeita_batt_condition;
+	int			jeita_skin_condition;
+	int			jeita_wlc_condition;
+	int			jeita_synth_condition;
+	int			jeita_aux_thresh_hot;
+	int			jeita_aux_thresh_warm;
+	int			jeita_wlc_thresh_hot;
+	int			jeita_wlc_thresh_warm;
+	int			jeita_warm_fcc_ua;
+	int			jeita_cool_fcc_ua;
+	int			jeita_warm_fv_uv;
+	bool			jeita_vbus_rising;
+	bool			jeita_rb_warm_hi_vbatt_en;
+	bool			jeita_keep_fake_charging;
+	int			jeita_debug_log_interval;
+
+	/* low batt shutdown */
+	int			low_batt_shutdown_enabled;
+
+	/* smart charge */
+	bool			smart_charge_enabled;
+	bool			smart_charge_suspended;
+	struct delayed_work	smart_charge_wdog_work;
+	struct mutex		smart_charge_lock;
+
+	/* limited range charge */
+	bool			lrc_enabled;
+	int			lrc_socmax;
+	int			lrc_socmin;
+	int			lrc_status;
+	bool			lrc_fake_capacity;
+	int			lrc_hysterisis;
+
+	/* charger removal */
+	struct delayed_work	charger_removal_work;
+	struct input_dev	*charger_removal_input;
+	struct somc_wake_lock	charger_removal_wakelock;
+
+	/* wireless */
+	bool			wireless_enable;
+	bool			dcin_uv;
+	bool			vbus_reg_en;
+	u8			dcin_aicl_thresh_raw;
+	int			dc_h_volt_icl_ua;
+	int			dc_h_volt_boost_icl_ua;
+	int			dc_l_volt_icl_ua;
+	bool			wireless_wa_fake_charging;
+	struct work_struct	wireless_wa_fake_charging_work;
+	ktime_t			wireless_wa_en_ktime;
+	int			wireless_thermal_limit_voltage;
+	struct delayed_work	wireless_v_chg_work;
+
+	/* real temperature */
+	int			batt_temp_correctton;
+	int			skin_temp_correctton;
+	int			wlc_temp_correctton;
+	bool			real_temp_use_aux;
+	bool			real_temp_use_wlc;
+
+	/* misc */
+	int			running_status;
+	int			faked_status;
+	bool			charger_type_determined;
+
+	/* current/voltage ctrl for debug */
+	int			debug_dcin_aicl_thresh_raw;
+	int			debug_dcin_aicl_thresh_enable;
+
+	struct iio_channel	**iio_chan_list_idtp9221;
+#endif
 };
 
 int smblib_read(struct smb_charger *chg, u16 addr, u8 *val);
@@ -561,5 +720,48 @@ int smblib_init(struct smb_charger *chg);
 int smblib_deinit(struct smb_charger *chg);
 int smb2_iio_get_prop(struct smb_charger *chg, int channel, int *val);
 int smb2_iio_set_prop(struct smb_charger *chg, int channel, int val);
+
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+int smblib_somc_get_charger_type(struct smb_charger *chg);
+
+irqreturn_t smblib_handle_dcin_debug(int irq, void *data);
+irqreturn_t smblib_handle_dcin_uv(int irq, void *data);
+irqreturn_t smblib_handle_aicl_done(int irq, void *data);
+
+int smblib_get_prop_charging_enabled(struct smb_charger *chg,
+				int *val);
+int smblib_get_prop_real_temp(struct smb_charger *chg,
+				int *val);
+int smblib_get_prop_legacy_cable_status(struct smb_charger *chg,
+				int *val);
+int smblib_get_prop_skin_temp(struct smb_charger *chg,
+				int *val);
+int smblib_get_prop_dc_voltage_now(struct smb_charger *chg,
+				int *val);
+int smblib_get_prop_dc_current_now(struct smb_charger *chg,
+				int *val);
+
+int smblib_set_prop_charging_enabled(struct smb_charger *chg,
+				int val);
+int smblib_set_prop_wireless_mode(struct smb_charger *chg,
+				int val);
+
+int smblib_set_dcin_aicl_thresh(struct smb_charger *chg);
+
+const char *smblib_somc_get_faked_status(struct smb_charger *chg);
+
+void smblib_somc_thermal_fcc_change(struct smb_charger *chg);
+void smblib_somc_thermal_icl_change(struct smb_charger *chg);
+void smblib_somc_set_low_batt_suspend_en(struct smb_charger *chg);
+void smblib_somc_ctrl_inhibit(struct smb_charger *chg, bool en);
+const char *smblib_somc_get_battery_charger_status(struct smb_charger *chg);
+int smblib_somc_smart_set_suspend(struct smb_charger *chg);
+int smblib_somc_lrc_get_capacity(struct smb_charger *chg,
+				int capacity);
+void smblib_somc_lrc_check(struct smb_charger *chg);
+int smblib_get_usb_max_current_limited(struct smb_charger *chg);
+void smblib_somc_handle_wireless_exclusion(struct smb_charger *chg);
+#endif
 
 #endif /* __SMB2_CHARGER_H */

@@ -27,12 +27,26 @@ enum fg_gen3_chg_iio_channels {
 	SMB2_FG_GEN3_CYCLE_COUNT,
 	SMB2_FG_GEN3_CHARGE_FULL_DESIGN,
 	SMB2_FG_GEN3_TIME_TO_FULL_NOW,
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	SMB2_FG_GEN3_SOMC_MONOTONIC_SOC,
+#endif
 };
 
 /* For smb2-lib.c and smb2-iio.c */
 enum smb2_parallel_iio_channels {
 	SMB2_SET_SHIP_MODE,
 };
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+/* For idtp9221.c */
+enum idtp9221_iio_channels {
+	IDTP9221_SOMC_AUTH,
+	IDTP9221_SOMC_CHARGER_TYPE,
+	IDTP9221_SOMC_USBIN_VALID,
+	IDTP9221_SOMC_WIRELESS_STATUS,
+	IDTP9221_SOMC_WIRELESS_THERMAL_V_LIMIT,
+};
+#endif
 
 struct smb2_iio_prop_channels {
 	const char *datasheet_name;
@@ -138,6 +152,27 @@ static const struct smb2_iio_prop_channels smb2_chans_pmic[] = {
 	SMB2_CHAN_ACTIVITY("battery_force_recharge", FORCE_RECHARGE)
 	SMB2_CHAN_ACTIVITY("battery_fcc_stepper_enable", FCC_STEPPER_ENABLE)
 	SMB2_CHAN_ACTIVITY("charge_qnovo_enable", CHARGE_QNOVO_ENABLE)
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	SMB2_CHAN_INDEX("somc_charger_type", SOMC_CHARGER_TYPE)
+	SMB2_CHAN_INDEX("somc_legacy_cable_status", SOMC_LEGACY_CABLE_STATUS)
+	SMB2_CHAN_INDEX("somc_charger_type_determined", SOMC_CHARGER_TYPE_DETERMINED)
+	SMB2_CHAN_VOLT("somc_dc_voltage_now", SOMC_DC_VOLTAGE_NOW)
+	SMB2_CHAN_CUR("somc_dc_input_current_now", SOMC_DC_INPUT_CURRENT_NOW)
+	SMB2_CHAN_INDEX("somc_wireless_mode", SOMC_WIRELESS_MODE)
+	SMB2_CHAN_ACTIVITY("somc_charging_enabled", SOMC_CHARGING_ENABLED)
+	SMB2_CHAN_TEMP("somc_skin_temp", SOMC_SKIN_TEMP)
+	SMB2_CHAN_TEMP("somc_system_temp_level", SOMC_SYSTEM_TEMP_LEVEL)
+	SMB2_CHAN_ACTIVITY("somc_smart_charging_activation", SOMC_SMART_CHARGING_ACTIVATION)
+	SMB2_CHAN_INDEX("somc_smart_charging_interruption", SOMC_SMART_CHARGING_INTERRUPTION)
+	SMB2_CHAN_INDEX("somc_smart_charging_status", SOMC_SMART_CHARGING_STATUS)
+	SMB2_CHAN_INDEX("somc_lrc_enable", SOMC_LRC_ENABLE)
+	SMB2_CHAN_INDEX("somc_lrc_socmax", SOMC_LRC_SOCMAX)
+	SMB2_CHAN_INDEX("somc_lrc_socmin", SOMC_LRC_SOCMIN)
+	SMB2_CHAN_INDEX("somc_lrc_not_startup", SOMC_LRC_NOT_STARTUP)
+	SMB2_CHAN_CUR("somc_max_charge_current", SOMC_MAX_CHARGE_CURRENT)
+	SMB2_CHAN_TEMP("somc_real_temp", SOMC_REAL_TEMP)
+	SMB2_CHAN_INDEX("somc_running_status", SOMC_RUNNING_STATUS)
+#endif
 };
 
 struct iio_channel **get_ext_channels(struct device *dev,

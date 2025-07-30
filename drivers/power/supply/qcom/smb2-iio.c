@@ -193,6 +193,71 @@ int smb2_iio_get_prop(struct smb_charger *chg, int channel, int *val)
 		*val = get_client_vote_locked(chg->fcc_votable,
 				QNOVO_VOTER);
 		break;
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	/* USB */
+	case PSY_IIO_SOMC_CHARGER_TYPE:
+		*val = smblib_somc_get_charger_type(chg);
+		break;
+	case PSY_IIO_SOMC_LEGACY_CABLE_STATUS:
+		rc = smblib_get_prop_legacy_cable_status(chg, val);
+		break;
+	case PSY_IIO_SOMC_CHARGER_TYPE_DETERMINED:
+		*val = chg->charger_type_determined;
+		break;
+	
+	/* DC */
+	case PSY_IIO_SOMC_DC_VOLTAGE_NOW:
+		rc = smblib_get_prop_dc_voltage_now(chg, val);
+		break;
+	case PSY_IIO_SOMC_DC_INPUT_CURRENT_NOW:
+		rc = smblib_get_prop_dc_current_now(chg, val);
+		break;
+	case PSY_IIO_SOMC_WIRELESS_MODE:
+		break;
+
+	/* BATTERY */
+	case PSY_IIO_SOMC_CHARGING_ENABLED:
+		rc = smblib_get_prop_charging_enabled(chg, val);
+		break;
+	case PSY_IIO_SOMC_SYSTEM_TEMP_LEVEL:
+		rc = smblib_get_prop_system_temp_level(chg, &pval);
+		if (!rc)
+			*val = pval.intval;
+		break;
+	case PSY_IIO_SOMC_SKIN_TEMP:
+		rc = smblib_get_prop_skin_temp(chg, val);
+		break;
+	case PSY_IIO_SOMC_SMART_CHARGING_ACTIVATION:
+		*val = chg->smart_charge_enabled;
+		break;
+	case PSY_IIO_SOMC_SMART_CHARGING_INTERRUPTION:
+	case PSY_IIO_SOMC_SMART_CHARGING_STATUS:
+		*val = chg->smart_charge_suspended;
+		break;
+	case PSY_IIO_SOMC_LRC_ENABLE:
+		*val = chg->lrc_enabled;
+		break;
+	case PSY_IIO_SOMC_LRC_SOCMAX:
+		*val = chg->lrc_socmax;
+		break;
+	case PSY_IIO_SOMC_LRC_SOCMIN:
+		*val = chg->lrc_socmin;
+		break;
+	case PSY_IIO_SOMC_LRC_NOT_STARTUP:
+		*val = chg->lrc_fake_capacity;
+		break;
+	case PSY_IIO_SOMC_MAX_CHARGE_CURRENT:
+		*val = get_client_vote(chg->fcc_votable, QNS_VOTER);
+		break;
+	case PSY_IIO_SOMC_REAL_TEMP:
+		rc = smblib_get_prop_real_temp(chg, val);
+		break;
+	case PSY_IIO_SOMC_RUNNING_STATUS:
+		*val = chg->running_status;
+		break;
+#endif
+
 	default:
 		pr_err("get prop %d is not supported\n", channel);
 		rc = -EINVAL;
@@ -207,11 +272,23 @@ int smb2_iio_get_prop(struct smb_charger *chg, int channel, int *val)
 	return IIO_VAL_INT;
 }
 
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+#define FAKE_CAPACITY_HYSTERISIS	1
+#endif
+
 int smb2_iio_set_prop(struct smb_charger *chg, int channel, int val)
 {
 	int rc = 0;
 
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	union power_supply_propval pval = {0, };
+
+	if (!chg->typec_present &&
+		channel != PSY_IIO_TYPEC_POWER_ROLE) {
+		pr_warn("set_prop is inhibited because typec is not present\n");
+#else
 	if (!chg->typec_present) {
+#endif
 		switch (channel) {
 		case PSY_IIO_MOISTURE_DETECTED:
 			vote(chg->disable_power_role_switch, MOISTURE_VOTER,
@@ -327,6 +404,62 @@ int smb2_iio_set_prop(struct smb_charger *chg, int channel, int val)
 		if (chg->batt_psy)
 			power_supply_changed(chg->batt_psy);
 		break;
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	/* DC */
+	case PSY_IIO_SOMC_WIRELESS_MODE:
+		rc = smblib_set_prop_wireless_mode(chg, val);
+		break;
+
+	/* BATTERY */
+	case PSY_IIO_SOMC_CHARGING_ENABLED:
+		rc = smblib_set_prop_charging_enabled(chg, val);
+		break;
+	case PSY_IIO_SOMC_SYSTEM_TEMP_LEVEL:
+		pval.intval = val;
+		rc = smblib_set_prop_system_temp_level(chg, &pval);
+		break;
+	case PSY_IIO_SOMC_SMART_CHARGING_ACTIVATION:
+		if (val) {
+			pr_debug("Smart Charging was activated.\n");
+			chg->smart_charge_enabled = true;
+		}
+		break;
+	case PSY_IIO_SOMC_SMART_CHARGING_INTERRUPTION:
+		if (chg->smart_charge_enabled) {
+			chg->smart_charge_suspended = (bool)val;
+			rc = smblib_somc_smart_set_suspend(chg);
+			power_supply_changed(chg->batt_psy);
+		}
+		break;
+	case PSY_IIO_SOMC_LRC_ENABLE:
+		chg->lrc_enabled = val;
+		smblib_somc_lrc_check(chg);
+		break;
+	case PSY_IIO_SOMC_LRC_SOCMAX:
+		chg->lrc_socmax = val;
+		break;
+	case PSY_IIO_SOMC_LRC_SOCMIN:
+		chg->lrc_socmin = val;
+		break;
+	case PSY_IIO_SOMC_LRC_NOT_STARTUP:
+		chg->lrc_fake_capacity = val;
+		if (chg->lrc_fake_capacity)
+			chg->lrc_hysterisis = FAKE_CAPACITY_HYSTERISIS;
+		break;
+	case PSY_IIO_SOMC_MAX_CHARGE_CURRENT:
+		vote(chg->fcc_votable, QNS_VOTER, true, val);
+		break;
+	case PSY_IIO_SOMC_RUNNING_STATUS:
+		if ((val == RUNNING_STATUS_NORMAL) ||
+				(val == RUNNING_STATUS_OFF_CHARGE) ||
+				(val == RUNNING_STATUS_SHUTDOWN))
+			chg->running_status = val;
+		else
+			rc = -EINVAL;
+		break;
+#endif
+
 	default:
 		pr_err("get prop %d is not supported\n", channel);
 		rc = -EINVAL;

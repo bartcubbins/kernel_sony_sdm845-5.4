@@ -142,4 +142,9 @@ config QTI_QBG
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called qti-qbg-main.
+
+config SOMC_CHARGER_EXTENSION
+	bool "SoMC charger driver extension"
+	help
+	  Say Y here to enable extensional function of charger driver.
 endif
