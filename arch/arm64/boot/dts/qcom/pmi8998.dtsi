@@ -297,12 +297,20 @@
 		};
 
 		pmi8998_fg: qpnp,fg {
-			compatible = "qcom,fg-gen3";
+			compatible = "qcom,pmi8998-fg-gen3";
 			#address-cells = <1>;
 			#size-cells = <1>;
+			#io-channel-cells = <1>;
+
 			qcom,pmic-revid = <&pmi8998_revid>;
-			io-channels = <&pmi8998_rradc 0>;
-			io-channel-names = "rradc_batt_id";
+
+			io-channels = <&pmi8998_rradc 0>,
+				      <&pmi8998_charger PSY_IIO_CHARGE_QNOVO_ENABLE>,
+				      <&pmi8998_charger PSY_IIO_CHARGE_DONE>;
+			io-channel-names = "rradc_batt_id",
+					   "charge_qnovo_enable",
+					   "charge_done";
+
 			qcom,rradc-base = <0x4500>;
 			qcom,fg-esr-timer-awake = <96 96>;
 			qcom,fg-esr-timer-asleep = <256 256>;
