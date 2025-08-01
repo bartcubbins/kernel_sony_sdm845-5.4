@@ -816,6 +816,9 @@ int fg_dump_regs(struct fg_dev *fg)
 	return 0;
 }
 
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+#define SOC_READABLE_WAIT_MS		400
+#endif
 int fg_restart(struct fg_dev *fg, int wait_time_ms)
 {
 	union power_supply_propval pval = {0, };
@@ -861,6 +864,12 @@ wait:
 			BATT_SOC_RESTART(fg), rc);
 		goto out;
 	}
+
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	msleep(SOC_READABLE_WAIT_MS);
+	fg_dbg(fg, FG_SOMC, "fg restart has been completed\n");
+#endif
+
 out:
 	fg->fg_restarting = false;
 	return rc;
@@ -905,6 +914,9 @@ int fg_get_msoc(struct fg_dev *fg, int *msoc)
 	if (rc < 0)
 		return rc;
 
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	*msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY, FULL_SOC_RAW);
+#else
 	/*
 	 * To have better endpoints for 0 and 100, it is good to tune the
 	 * calculation discarding values 0 and 255 while rounding off. Rest
@@ -918,6 +930,8 @@ int fg_get_msoc(struct fg_dev *fg, int *msoc)
 	else
 		*msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
 				FULL_SOC_RAW - 2) + 1;
+#endif
+
 	return 0;
 }
 
@@ -933,8 +947,16 @@ const char *fg_get_battery_type(struct fg_dev *fg)
 	case PROFILE_SKIPPED:
 		return SKIP_BATT_TYPE;
 	case PROFILE_LOADED:
-		if (fg->bp.batt_type_str)
+		if (fg->bp.batt_type_str) {
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+			if (strlen(fg->org_batt_type_str) == ORG_BATT_TYPE_SIZE)
+				return fg->org_batt_type_str;
+			else
+				return fg->bp.batt_type_str;
+#else
 			return fg->bp.batt_type_str;
+#endif
+		}
 		break;
 	case PROFILE_NOT_LOADED:
 		return MISSING_BATT_TYPE;

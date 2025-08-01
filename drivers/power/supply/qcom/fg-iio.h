@@ -94,6 +94,14 @@ static const struct fg_gen3_iio_channels fg_gen3_iio_psy_channels[] = {
 	FG_GEN3_CHAN_ENERGY("charge_counter_shadow", PSY_IIO_CHARGE_COUNTER_SHADOW)
 	FG_GEN3_CHAN_VOLT("constant_charge_voltage", PSY_IIO_CONSTANT_CHARGE_VOLTAGE)
 	FG_GEN3_CHAN_ACT("fg_charge_qnovo_enable", PSY_IIO_CHARGE_QNOVO_ENABLE)
+#if defined(CONFIG_SOMC_CHARGER_EXTENSION)
+	FG_GEN3_CHAN_ENERGY("somc_charge_full_raw", PSY_IIO_SOMC_CHARGE_FULL_RAW)
+	FG_GEN3_CHAN_COUNT("somc_learning_counter", PSY_IIO_SOMC_LEARNING_COUNTER)
+	FG_GEN3_CHAN_COUNT("somc_recharge_counter", PSY_IIO_SOMC_RECHARGE_COUNTER)
+	FG_GEN3_CHAN_COUNT("somc_full_counter", PSY_IIO_SOMC_FULL_COUNTER)
+	FG_GEN3_CHAN_INDEX("somc_monotonic_soc", PSY_IIO_SOMC_MONOTONIC_SOC)
+	FG_GEN3_CHAN_INDEX("somc_batt_aging_level", PSY_IIO_SOMC_BATT_AGING_LEVEL)
+#endif
 };
 
 enum fg_gen3_ext_iio_channels {
