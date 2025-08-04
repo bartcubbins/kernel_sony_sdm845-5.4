@@ -87,7 +87,7 @@
 			snps,hird-threshold = /bits/ 8 <0x10>;
 			snps,usb3_lpm_capable;
 			usb-core-id = <0>;
-			dr_mode = "drd";
+			dr_mode = "otg";
 			maximum-speed = "super-speed";
 		};
 
