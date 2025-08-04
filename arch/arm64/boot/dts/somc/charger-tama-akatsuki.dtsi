@@ -56,9 +56,9 @@
 					9000 5000 5000
 					5000 5000 5000>;
 	somc,fake-charging-temp-level = <13>;
-	somc,wireless-support;
+	//somc,wireless-support;
 	somc,jeita-use-aux-therm;
-	somc,jeita-use-wlc-therm;
+	//somc,jeita-use-wlc-therm;
 	somc,jeita-aux-thresh-hot = <900>;
 	somc,jeita-aux-thresh-warm = <700>;
 	somc,jeita-wlc-thresh-hot = <568>;
