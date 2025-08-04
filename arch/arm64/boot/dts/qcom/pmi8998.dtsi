@@ -264,6 +264,35 @@
 			qcom,default-sink-caps = <5000 3000>, /* 5V @ 3A */
 						 <9000 3000>, /* 9V @ 3A */
 						 <12000 2250>; /* 12V @ 2.25A */
+
+			io-channels = <&pmi8998_charger PSY_IIO_PD_ACTIVE>,
+				      <&pmi8998_charger PSY_IIO_TYPEC_CC_ORIENTATION>,
+				      <&pmi8998_charger PSY_IIO_CONNECTOR_TYPE>,
+				      <&pmi8998_charger PSY_IIO_TYPEC_POWER_ROLE>,
+				      <&pmi8998_charger PSY_IIO_PD_USB_SUSPEND_SUPPORTED>,
+				      <&pmi8998_charger PSY_IIO_TYPEC_SRC_RP>,
+				      <&pmi8998_charger PSY_IIO_PD_IN_HARD_RESET>,
+				      <&pmi8998_charger PSY_IIO_PD_CURRENT_MAX>,
+				      <&pmi8998_charger PSY_IIO_PR_SWAP>,
+				      <&pmi8998_charger PSY_IIO_PD_VOLTAGE_MIN>,
+				      <&pmi8998_charger PSY_IIO_PD_VOLTAGE_MAX>,
+				      <&pmi8998_charger PSY_IIO_USB_REAL_TYPE>,
+				      <&pmi8998_charger PSY_IIO_TYPEC_MODE>,
+				      <&pmi8998_charger PSY_IIO_PE_START>;
+			io-channel-names = "pd_active",
+					   "typec_cc_orientation",
+					   "connector_type",
+					   "typec_power_role",
+					   "pd_usb_suspend_supported",
+					   "typec_src_rp",
+					   "pd_in_hard_reset",
+					   "pr_current_max",
+					   "pr_swap",
+					   "pd_voltage_min",
+					   "pd_voltage_max",
+					   "real_type",
+					   "typec_mode",
+					   "pe_start";
 		};
 
 		bcl_sensor: bcl@4200 {
