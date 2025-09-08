@@ -1732,7 +1732,7 @@ static int ufs_qcom_pwr_change_notify(struct ufs_hba *hba,
 		if ((host->hw_ver.major >= 0x4) &&
 		    (dev_req_params->gear_tx == UFS_HS_G4))
 			ufs_qcom_set_adapt(hba);
-		else
+		else if (hba->ufs_version >= UFSHCI_VERSION_30)
 			/* NO ADAPT */
 			ufshcd_dme_set(hba,
 				       UIC_ARG_MIB(PA_TXHSADAPTTYPE),
