@@ -18,28 +18,28 @@
 	pmi8998_lsid0: qcom,pmi8998@2 {
 		compatible = "qcom,spmi-pmic";
 		reg = <0x2 SPMI_USID>;
-		#address-cells = <2>;
+		#address-cells = <1>;
 		#size-cells = <0>;
 
 		pmi8998_revid: qcom,revid@100 {
 			compatible = "qcom,qpnp-revid";
-			reg = <0x100 0x100>;
+			reg = <0x100>;
 			qcom,fab-id-valid;
 		};
 
 		pmi8998_misc: qcom,misc@900 {
 			compatible = "qcom,qpnp-misc";
-			reg = <0x900 0x100>;
+			reg = <0x900>;
 		};
 
 		qcom,power-on@800 {
 			compatible = "qcom,qpnp-power-on";
-			reg = <0x800 0x100>;
+			reg = <0x800>;
 		};
 
 		pmi8998_tz: qcom,temp-alarm@2400 {
 			compatible = "qcom,spmi-temp-alarm";
-			reg = <0x2400 0x100>;
+			reg = <0x2400>;
 			interrupts = <0x2 0x24 0x0 IRQ_TYPE_EDGE_RISING>;
 			io-channels = <&pmi8998_rradc 7>;
 			io-channel-names = "thermal";
@@ -49,7 +49,7 @@
 
 		pmi8998_gpios: pinctrl@c000 {
 			compatible = "qcom,spmi-gpio";
-			reg = <0xc000 0xe00>;
+			reg = <0xc000>;
 			interrupts = <0x2 0xc0 0 IRQ_TYPE_NONE>,
 					<0x2 0xc1 0 IRQ_TYPE_NONE>,
 					<0x2 0xc2 0 IRQ_TYPE_NONE>,
@@ -74,7 +74,7 @@
 
 		pmi8998_qnovo: qcom,qpnp-qnovo@1500 {
 			compatible = "qcom,qpnp-qnovo";
-			reg = <0x1500 0x100>;
+			reg = <0x1500>;
 			interrupts = <0x2 0x15 0x0 IRQ_TYPE_NONE>;
 			interrupt-names = "ptrain-done";
 			qcom,pmic-revid = <&pmi8998_revid>;
@@ -83,7 +83,7 @@
 		pmi8998_charger: qcom,qpnp-smb2 {
 			compatible = "qcom,pmi8998-smb2";
 			#address-cells = <1>;
-			#size-cells = <1>;
+			#size-cells = <0>;
 			#cooling-cells = <2>;
 			#io-channel-cells = <1>;
 
@@ -128,7 +128,7 @@
 			qcom,suspend-input-on-debug-batt;
 
 			qcom,chgr@1000 {
-				reg = <0x1000 0x100>;
+				reg = <0x1000>;
 				interrupts =
 					<0x2 0x10 0x0 IRQ_TYPE_EDGE_RISING>,
 					<0x2 0x10 0x1 IRQ_TYPE_EDGE_RISING>,
@@ -144,7 +144,7 @@
 			};
 
 			qcom,otg@1100 {
-				reg = <0x1100 0x100>;
+				reg = <0x1100>;
 				interrupts = <0x2 0x11 0x0 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x11 0x1 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x11 0x2 IRQ_TYPE_EDGE_BOTH>,
@@ -157,7 +157,7 @@
 			};
 
 			qcom,bat-if@1200 {
-				reg = <0x1200 0x100>;
+				reg = <0x1200>;
 				interrupts =
 					<0x2 0x12 0x0 IRQ_TYPE_EDGE_RISING>,
 					<0x2 0x12 0x1 IRQ_TYPE_EDGE_BOTH>,
@@ -175,7 +175,7 @@
 			};
 
 			qcom,usb-chgpth@1300 {
-				reg = <0x1300 0x100>;
+				reg = <0x1300>;
 				interrupts =
 					<0x2 0x13 0x0 IRQ_TYPE_EDGE_BOTH>,
 					<0x2 0x13 0x1 IRQ_TYPE_EDGE_BOTH>,
@@ -197,7 +197,7 @@
 			};
 
 			qcom,dc-chgpth@1400 {
-				reg = <0x1400 0x100>;
+				reg = <0x1400>;
 				interrupts =
 					<0x2 0x14 0x0 IRQ_TYPE_EDGE_BOTH>,
 					<0x2 0x14 0x1 IRQ_TYPE_EDGE_BOTH>,
@@ -217,7 +217,7 @@
 			};
 
 			qcom,chgr-misc@1600 {
-				reg = <0x1600 0x100>;
+				reg = <0x1600>;
 				interrupts =
 					<0x2 0x16 0x0 IRQ_TYPE_EDGE_RISING>,
 					<0x2 0x16 0x1 IRQ_TYPE_EDGE_RISING>,
@@ -241,7 +241,7 @@
 
 		pmi8998_pdphy: qcom,usb-pdphy@1700 {
 			compatible = "qcom,qpnp-pdphy";
-			reg = <0x1700 0x100>;
+			reg = <0x1700>;
 			vdd-pdphy-supply = <&pm8998_l24>;
 			vbus-supply = <&ext_5v_boost>;
 			vconn-supply = <&smb2_vconn>;
@@ -297,8 +297,7 @@
 
 		bcl_sensor: bcl@4200 {
 			compatible = "qcom,msm-bcl-lmh";
-			reg = <0x4200 0xff>,
-				<0x4300 0xff>;
+			reg = <0x4200>, <0x4300>;
 			reg-names = "fg_user_adc",
 					"fg_lmh";
 			interrupts = <0x2 0x42 0x0 IRQ_TYPE_NONE>,
@@ -316,7 +315,7 @@
 
 		pmi8998_rradc: rradc@4500 {
 			compatible = "qcom,rradc";
-			reg = <0x4500 0x100>;
+			reg = <0x4500>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			#io-channel-cells = <1>;
@@ -328,7 +327,7 @@
 		pmi8998_fg: qpnp,fg {
 			compatible = "qcom,pmi8998-fg-gen3";
 			#address-cells = <1>;
-			#size-cells = <1>;
+			#size-cells = <0>;
 			#io-channel-cells = <1>;
 
 			qcom,pmic-revid = <&pmi8998_revid>;
@@ -352,7 +351,7 @@
 
 			qcom,fg-batt-soc@4000 {
 				status = "okay";
-				reg = <0x4000 0x100>;
+				reg = <0x4000>;
 				interrupts = <0x2 0x40 0x0 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x40 0x1 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x40 0x2
@@ -376,7 +375,7 @@
 
 			qcom,fg-batt-info@4100 {
 				status = "okay";
-				reg = <0x4100 0x100>;
+				reg = <0x4100>;
 				interrupts = <0x2 0x41 0x0 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x41 0x1 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x41 0x2 IRQ_TYPE_EDGE_BOTH>,
@@ -391,7 +390,7 @@
 
 			qcom,fg-memif@4400 {
 				status = "okay";
-				reg = <0x4400 0x100>;
+				reg = <0x4400>;
 				interrupts = <0x2 0x44 0x0 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x44 0x1 IRQ_TYPE_EDGE_BOTH>,
 					     <0x2 0x44 0x2
@@ -404,14 +403,14 @@
 	};
 
 	pmi8998_lsid1: qcom,pmi8998@3 {
-		compatible ="qcom,spmi-pmic";
+		compatible = "qcom,spmi-pmic";
 		reg = <0x3 SPMI_USID>;
-		#address-cells = <2>;
+		#address-cells = <1>;
 		#size-cells = <0>;
 
 		pmi8998_lpg: qcom,pwms@b100 {
 			compatible = "qcom,pwm-lpg";
-			reg = <0xb100 0x600>, <0xb000 0x100>;
+			reg = <0xb100>, <0xb000>;
 			reg-names = "lpg-base", "lut-base";
 			#pwm-cells = <2>;
 			qcom,num-lpg-channels = <6>;
@@ -487,7 +486,7 @@
 
 		pmi8998_rgb_led: qcom,pwms@d000 {
 			compatible = "qcom,tri-led";
-			reg = <0xd000 0x100>;
+			reg = <0xd000>;
 
 			red {
 				label = "red";
@@ -514,12 +513,12 @@
 		labibb: qpnp-labibb-regulator {
 			compatible = "qcom,qpnp-labibb-regulator";
 			#address-cells = <1>;
-			#size-cells = <1>;
+			#size-cells = <0>;
 			qcom,pmic-revid = <&pmi8998_revid>;
 			status = "disabled";
 
 			ibb_regulator: qcom,ibb@dc00 {
-				reg = <0xdc00 0x100>;
+				reg = <0xdc00>;
 				reg-names = "ibb_reg";
 				regulator-name = "ibb_reg";
 
@@ -555,7 +554,7 @@
 			};
 
 			lab_regulator: qcom,lab@de00 {
-				reg = <0xde00 0x100>;
+				reg = <0xde00>;
 				reg-names = "lab";
 				regulator-name = "lab_reg";
 
@@ -594,8 +593,7 @@
 
 		pmi8998_wled: qcom,leds@d800 {
 			compatible = "qcom,pmi8998-spmi-wled";
-			reg = <0xd800 0x100>,
-			      <0xd900 0x100>;
+			reg = <0xd800>, <0xd900>;
 			reg-names = "wled-ctrl-base",
 				    "wled-sink-base";
 			interrupts = <0x3 0xd8 0x1 IRQ_TYPE_EDGE_RISING>,
@@ -616,7 +614,7 @@
 		flash_led: qcom,leds@d300 {
 			compatible = "qcom,qpnp-flash-led-v2";
 			status = "okay";
-			reg = <0xd300 0x100>;
+			reg = <0xd300>;
 			label = "flash";
 			interrupts = <0x3 0xd3 0x0 IRQ_TYPE_EDGE_RISING>,
 				     <0x3 0xd3 0x3 IRQ_TYPE_EDGE_RISING>,
@@ -733,7 +731,7 @@
 
 		pmi8998_haptics: qcom,haptics@c000 {
 			compatible = "qcom,haptics";
-			reg = <0xc000 0x100>;
+			reg = <0xc000>;
 			interrupts = <0x3 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
 				     <0x3 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
 			interrupt-names = "hap-sc-irq", "hap-play-irq";

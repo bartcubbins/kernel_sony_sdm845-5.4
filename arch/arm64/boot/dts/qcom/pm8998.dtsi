@@ -14,17 +14,17 @@
 	qcom,pm8998@0 {
 		compatible = "qcom,spmi-pmic";
 		reg = <0x0 SPMI_USID>;
-		#address-cells = <2>;
+		#address-cells = <1>;
 		#size-cells = <0>;
 
 		pm8998_revid: qcom,revid@100 {
 			compatible = "qcom,qpnp-revid";
-			reg = <0x100 0x100>;
+			reg = <0x100>;
 		};
 
 		qcom,power-on@800 {
 			compatible = "qcom,qpnp-power-on";
-			reg = <0x800 0x100>;
+			reg = <0x800>;
 			interrupts = <0x0 0x8 0x0 IRQ_TYPE_NONE>,
 				     <0x0 0x8 0x1 IRQ_TYPE_NONE>,
 				     <0x0 0x8 0x4 IRQ_TYPE_NONE>,
@@ -61,7 +61,7 @@
 
 		pm8998_tz: qcom,temp-alarm@2400 {
 			compatible = "qcom,spmi-temp-alarm";
-			reg = <0x2400 0x100>;
+			reg = <0x2400>;
 			interrupts = <0x0 0x24 0x0 IRQ_TYPE_EDGE_RISING>;
 			io-channels = <&pm8998_vadc ADC5_DIE_TEMP>;
 			io-channel-names = "thermal";
@@ -71,7 +71,7 @@
 
 		pm8998_gpios: pinctrl@c000 {
 			compatible = "qcom,spmi-gpio";
-			reg = <0xc000 0x1a00>;
+			reg = <0xc000>;
 			interrupts = <0x0 0xc0 0 IRQ_TYPE_NONE>,
 					<0x0 0xc1 0 IRQ_TYPE_NONE>,
 					<0x0 0xc3 0 IRQ_TYPE_NONE>,
@@ -108,7 +108,7 @@
 
 		pm8998_coincell: qcom,coincell@2800 {
 			compatible = "qcom,qpnp-coincell";
-			reg = <0x2800 0x100>;
+			reg = <0x2800>;
 		};
 
 		pm8998_rtc: qcom,pm8998_rtc {
@@ -118,7 +118,7 @@
 
 		pm8998_vadc: vadc@3100 {
 			compatible = "qcom,spmi-adc-rev2";
-			reg = <0x3100 0x100>;
+			reg = <0x3100>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			interrupts = <0x0 0x31 0x0 IRQ_TYPE_EDGE_RISING>;
@@ -149,7 +149,7 @@
 
 		pm8998_adc_tm: vadc@3400 {
 			compatible = "qcom,adc-tm-rev2";
-			reg = <0x3400 0x100>;
+			reg = <0x3400>;
 			interrupts = <0x0 0x34 0x0 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "thr-int-en";
 			#address-cells = <1>;
@@ -160,7 +160,7 @@
 
 		pm8998_clkdiv: clock-controller@5b00 {
 			compatible = "qcom,spmi-clkdiv";
-			reg = <0x5b00 0x300>;
+			reg = <0x5b00>;
 			#clock-cells = <1>;
 			qcom,num-clkdivs = <3>;
 			clock-output-names = "pm8998_div_clk1",
@@ -173,7 +173,7 @@
 	qcom,pm8998@1 {
 		compatible = "qcom,spmi-pmic";
 		reg = <0x1 SPMI_USID>;
-		#address-cells = <2>;
+		#address-cells = <1>;
 		#size-cells = <0>;
 	};
 };
