@@ -77,19 +77,6 @@ struct qcom_icc_desc {
 		.links = { __VA_ARGS__ },				\
 	}
 
-DEFINE_QNODE(sdm845_osm_apps_l3, OSM_MASTER_L3_APPS, 16, OSM_SLAVE_L3);
-DEFINE_QNODE(sdm845_osm_l3, OSM_SLAVE_L3, 16);
-
-static struct qcom_icc_node *sdm845_osm_l3_nodes[] = {
-	[MASTER_OSM_L3_APPS] = &sdm845_osm_apps_l3,
-	[SLAVE_OSM_L3] = &sdm845_osm_l3,
-};
-
-const static struct qcom_icc_desc sdm845_icc_osm_l3 = {
-	.nodes = sdm845_osm_l3_nodes,
-	.num_nodes = ARRAY_SIZE(sdm845_osm_l3_nodes),
-};
-
 DEFINE_QNODE(mas_osm_l3_apps, OSM_MASTER_L3_APPS, 1,
 		OSM_SLAVE_L3_CLUSTER0, OSM_SLAVE_L3_CLUSTER1,
 		OSM_SLAVE_L3_CLUSTER2, OSM_SLAVE_L3_MISC, OSM_SLAVE_L3_GPU);
@@ -98,6 +85,23 @@ DEFINE_QNODE(slv_osm_l3_cluster1, OSM_SLAVE_L3_CLUSTER1, 1);
 DEFINE_QNODE(slv_osm_l3_cluster2, OSM_SLAVE_L3_CLUSTER2, 1);
 DEFINE_QNODE(slv_osm_l3_misc, OSM_SLAVE_L3_MISC, 1);
 DEFINE_QNODE(slv_osm_l3_gpu, OSM_SLAVE_L3_GPU, 1);
+
+DEFINE_QNODE(mas_osm_l3_apps_sdm845, OSM_MASTER_L3_APPS, 1,
+		OSM_SLAVE_L3_CLUSTER0, OSM_SLAVE_L3_CLUSTER1,
+		OSM_SLAVE_L3_MISC, OSM_SLAVE_L3_GPU);
+
+static struct qcom_icc_node *sdm845_osm_l3_nodes[] = {
+	[MASTER_OSM_L3_APPS] = &mas_osm_l3_apps_sdm845,
+	[SLAVE_OSM_L3_CLUSTER0] = &slv_osm_l3_cluster0,
+	[SLAVE_OSM_L3_CLUSTER1] = &slv_osm_l3_cluster1,
+	[SLAVE_OSM_L3_MISC] = &slv_osm_l3_misc,
+	[SLAVE_OSM_L3_GPU] = &slv_osm_l3_gpu,
+};
+
+const static struct qcom_icc_desc sdm845_icc_osm_l3 = {
+	.nodes = sdm845_osm_l3_nodes,
+	.num_nodes = ARRAY_SIZE(sdm845_osm_l3_nodes),
+};
 
 static struct qcom_icc_node *sm8150_osm_l3_nodes[] = {
 	[MASTER_OSM_L3_APPS] = &mas_osm_l3_apps,
