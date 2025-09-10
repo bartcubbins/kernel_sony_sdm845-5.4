@@ -7,6 +7,7 @@
 #include <dt-bindings/iio/qcom,spmi-vadc.h>
 #include <dt-bindings/gpio/gpio.h>
 #include "sdm845-pmic-overlay.dtsi"
+#include "sdm845-thermal-overlay.dtsi"
 #include "sdm845-pinctrl-overlay.dtsi"
 #include "sdm845-camera-sensor-mtp.dtsi"
 
