@@ -66,6 +66,7 @@
 			capacity-dmips-mhz = <1024>;
 			cache-size = <0x8000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
@@ -104,6 +105,7 @@
 			capacity-dmips-mhz = <1024>;
 			cache-size = <0x8000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_100>;
@@ -136,6 +138,7 @@
 			capacity-dmips-mhz = <1024>;
 			cache-size = <0x8000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_200>;
@@ -168,6 +171,7 @@
 			capacity-dmips-mhz = <1024>;
 			cache-size = <0x8000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_300>;
@@ -200,6 +204,7 @@
 			capacity-dmips-mhz = <1740>;
 			cache-size = <0x20000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_400>;
@@ -232,6 +237,7 @@
 			capacity-dmips-mhz = <1740>;
 			cache-size = <0x20000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_500>;
@@ -264,6 +270,7 @@
 			capacity-dmips-mhz = <1740>;
 			cache-size = <0x20000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_600>;
@@ -296,6 +303,7 @@
 			capacity-dmips-mhz = <1740>;
 			cache-size = <0x20000>;
 			cpu-release-addr = <0x0 0x90000000>;
+			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_700>;
@@ -1400,6 +1408,19 @@
 		clocks = <&clock_rpmh RPMH_CXO_CLK>,
 			<&clock_gcc GPLL0>;
 		#interconnect-cells = <1>;
+	};
+
+	cpufreq_hw: cpufreq@17d43000 {
+		compatible = "qcom,cpufreq-hw";
+		reg = <0x17d43000 0x1400>, <0x17d45800 0x1400>;
+		reg-names = "freq-domain0", "freq-domain1";
+
+		clock-names = "xo", "alternate";
+		clocks = <&clock_rpmh RPMH_CXO_CLK>,
+			<&clock_gcc GPLL0>;
+		qcom,no-accumulative-counter;
+
+		#freq-domain-cells = <2>;
 	};
 
 	ufsphy_mem: ufsphy_mem@1d87000 {
