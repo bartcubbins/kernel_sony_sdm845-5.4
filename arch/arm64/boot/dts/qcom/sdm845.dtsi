@@ -707,7 +707,7 @@
 	};
 };
 
-#include "msm-gdsc-sdm845.dtsi"
+#include "sdm845-gdsc.dtsi"
 #include "msm-rdbg.dtsi"
 #include "sdm845-sde.dtsi"
 #include "sdm845-qupv3.dtsi"
