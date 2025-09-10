@@ -33,24 +33,15 @@
 		qcom,gpu-quirk-hfi-use-reg;
 		qcom,gpu-quirk-secvid-set-once;
 
-		qcom,idle-timeout = <80>; //msecs
 		qcom,no-nap;
-
-		qcom,highest-bank-bit = <15>;
 
 		qcom,min-access-length = <32>;
 
 		qcom,ubwc-mode = <2>;
 
-		qcom,snapshot-size = <1048576>; //bytes
-
 		qcom,gpu-qdss-stm = <0x161c0000 0x40000>; // base addr, size
 
-		qcom,tsens-name = "tsens_tz_sensor12";
-
 		tzone-names = "gpu0-usr", "gpu1-usr";
-
-		qcom,pm-qos-active-latency = <460>;
 
 		clocks = <&clock_gfx GPU_CC_GX_GFX3D_CLK>,
 			<&clock_gpucc GPU_CC_CXO_CLK>,
@@ -60,8 +51,6 @@
 
 		clock-names = "core_clk", "rbbmtimer_clk", "mem_clk",
 				"mem_iface_clk", "gmu_clk";
-
-		qcom,isense-clk-on-level = <1>;
 
 		interconnects = <&mem_noc MASTER_GRAPHICS_3D
 				&mc_virt SLAVE_EBI1>;
@@ -92,8 +81,6 @@
 		vddcx-supply = <&gpu_cx_gdsc>;
 		vdd-supply = <&gpu_gx_gdsc>;
 
-		/* GPU related llc slices */
-		cache-slice-names = "gpu", "gpuhtw";
 
 		qcom,gpu-coresights {
 			#address-cells = <1>;
@@ -268,19 +255,12 @@
 		compatible = "qcom,kgsl-smmu-v2";
 
 		reg = <0x05040000 0x10000>;
-		/* CB5(ATOS) & CB5/6/7 are protected by HYP */
-		qcom,protect = <0x40000 0xc000>;
-		qcom,micro-mmu-control = <0x6000>;
 
-		clocks =<&clock_gcc GCC_GPU_CFG_AHB_CLK>,
+		clocks = <&clock_gcc GCC_GPU_CFG_AHB_CLK>,
 			<&clock_gcc GCC_DDRSS_GPU_AXI_CLK>,
 			<&clock_gcc GCC_GPU_MEMNOC_GFX_CLK>;
 
 		clock-names = "iface_clk", "mem_clk", "mem_iface_clk";
-
-		qcom,secure_align_mask = <0xfff>;
-		qcom,retention;
-		qcom,hyp_secure_alloc;
 
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
@@ -298,7 +278,6 @@
 	};
 
 	gmu: qcom,gmu {
-		label = "kgsl-gmu";
 		compatible = "qcom,gpu-gmu";
 
 		reg = <0x506a000 0x30000>, <0xb200000 0x300000>;
@@ -319,29 +298,6 @@
 
 		clock-names = "gmu_clk", "cxo_clk", "axi_clk",
 				"memnoc_clk";
-
-		qcom,gmu-pwrlevels {
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			compatible = "qcom,gmu-pwrlevels";
-
-			/* GMU power levels must go from lowest to highest */
-			qcom,gmu-pwrlevel@0 {
-				reg = <0>;
-				qcom,gmu-freq = <0>;
-			};
-
-			qcom,gmu-pwrlevel@1 {
-				reg = <1>;
-				qcom,gmu-freq = <200000000>;
-			};
-
-			qcom,gmu-pwrlevel@2 {
-				reg = <2>;
-				qcom,gmu-freq = <400000000>;
-			};
-		};
 
 		gmu_user: gmu_user {
 			compatible = "qcom,smmu-gmu-user-cb";
