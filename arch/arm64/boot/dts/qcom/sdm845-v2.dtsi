@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021, Pavel Dubrova <pashadubrova@gmail.com>
+ * Copyright (c) 2021, 2025, Pavel Dubrova <pashadubrova@gmail.com>
  */
 
 #include "sdm845.dtsi"
@@ -274,10 +274,6 @@
 		< 1996800 1305600000 >,
 		< 2400000 1401600000 >,
 		< 2745600 1593600000 >;
-};
-
-&cpu_cpu_llcc_bwmon {
-	qcom,count-unit = <0x10000>;
 };
 
 &cpu_cpu_llcc_bw {
