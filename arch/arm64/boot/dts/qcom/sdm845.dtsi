@@ -528,6 +528,10 @@
 };
 
 &firmware {
+	scm {
+		compatible = "qcom,scm";
+	};
+
 	android {
 		compatible = "android,firmware";
 		vbmeta {
@@ -2754,6 +2758,19 @@
 			qcom,glinkpkt-ch-name = "DATA11";
 			qcom,glinkpkt-dev-name = "smd11";
 		};
+	};
+
+	qcom,secure-buffer {
+		compatible = "qcom,secure-buffer";
+	};
+
+	qcom_smcinvoke {
+		compatible = "qcom,smcinvoke";
+		qcom,support-legacy_smc;
+	};
+
+	qtee_shmbridge {
+		compatible = "qcom,tee-shared-memory-bridge";
 	};
 
 	qcom,sps {
