@@ -578,6 +578,9 @@ static void a6xx_deassert_gbif_halt(struct adreno_device *adreno_dev)
 {
 	struct kgsl_device *device = KGSL_DEVICE(adreno_dev);
 
+	if (!adreno_has_gbif(adreno_dev))
+		return;
+
 	kgsl_regwrite(device, A6XX_GBIF_HALT, 0x0);
 
 	if (adreno_is_a619_holi(adreno_dev))
