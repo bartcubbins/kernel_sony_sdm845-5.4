@@ -27,6 +27,12 @@
 #include "kgsl_trace.h"
 #include "kgsl_util.h"
 
+struct gmu_iommu_context {
+	const char *name;
+	struct platform_device *pdev;
+	struct iommu_domain *domain;
+};
+
 #define ARC_VOTE_GET_PRI(_v) ((_v) & 0xFF)
 #define ARC_VOTE_GET_SEC(_v) (((_v) >> 8) & 0xFF)
 #define ARC_VOTE_GET_VLVL(_v) (((_v) >> 16) & 0xFFFF)
@@ -58,6 +64,11 @@ static struct gmu_vma_entry a6xx_gmu_vma_legacy[] = {
 			.size = SZ_512M,
 			.next_va = 0x60000000
 		},
+	[GMU_NONCACHED_USER] = {
+			.start = 0x80000000,
+			.size = SZ_1G,
+			.next_va = 0x80000000
+		},
 };
 
 static struct gmu_vma_entry a6xx_gmu_vma[] = {
@@ -83,6 +94,16 @@ static struct gmu_vma_entry a6xx_gmu_vma[] = {
 			.size = SZ_512M,
 			.next_va = 0x60000000
 		},
+	[GMU_NONCACHED_USER] = {
+			.start = 0x80000000,
+			.size = SZ_1G,
+			.next_va = 0x80000000
+		},
+};
+
+static struct gmu_iommu_context a6xx_gmu_ctx[] = {
+	[GMU_CONTEXT_USER] = { .name = "gmu_user" },
+	[GMU_CONTEXT_KERNEL] = { .name = "gmu_kernel" }
 };
 
 static int timed_poll_check_rscc(struct kgsl_device *device,
@@ -602,6 +623,17 @@ static int find_vma_block(struct a6xx_gmu_device *gmu, u32 addr, u32 size)
 	}
 
 	return -ENOENT;
+}
+
+struct iommu_domain *a6xx_get_gmu_domain(struct a6xx_gmu_device *gmu,
+	u32 gmuaddr, u32 size)
+{
+	u32 vma_id = find_vma_block(gmu, gmuaddr, size);
+
+	if (vma_id == GMU_NONCACHED_USER)
+		return a6xx_gmu_ctx[GMU_CONTEXT_USER].domain;
+
+	return a6xx_gmu_ctx[GMU_CONTEXT_KERNEL].domain;
 }
 
 static int _load_legacy_gmu_fw(struct kgsl_device *device,
@@ -1421,7 +1453,7 @@ struct gmu_memdesc *reserve_gmu_kernel_block(struct a6xx_gmu_device *gmu,
 
 	md->gmuaddr = addr;
 
-	ret = iommu_map(gmu->domain, addr,
+	ret = iommu_map(a6xx_get_gmu_domain(gmu, md->gmuaddr, md->size), addr,
 		md->physaddr, md->size, IOMMU_READ | IOMMU_WRITE | IOMMU_PRIV);
 	if (ret) {
 		dev_err(&gmu->pdev->dev,
@@ -2396,6 +2428,18 @@ static int a6xx_gmu_bus_set(struct adreno_device *adreno_dev, int buslevel,
 	return ret;
 }
 
+static void a6xx_gmu_iommu_cb_close(struct gmu_iommu_context *ctx)
+{
+	if (!ctx->domain)
+		return;
+
+	iommu_detach_device(ctx->domain, &ctx->pdev->dev);
+	iommu_domain_free(ctx->domain);
+
+	platform_device_put(ctx->pdev);
+	ctx->domain = NULL;
+}
+
 static void a6xx_free_gmu_globals(struct a6xx_gmu_device *gmu)
 {
 	int i;
@@ -2406,7 +2450,7 @@ static void a6xx_free_gmu_globals(struct a6xx_gmu_device *gmu)
 		if (!md->gmuaddr)
 			continue;
 
-		iommu_unmap(gmu->domain,
+		iommu_unmap(a6xx_get_gmu_domain(gmu, md->gmuaddr, md->size),
 			md->gmuaddr, md->size);
 
 		dma_free_attrs(&gmu->pdev->dev, (size_t) md->size,
@@ -2415,11 +2459,8 @@ static void a6xx_free_gmu_globals(struct a6xx_gmu_device *gmu)
 		memset(md, 0, sizeof(*md));
 	}
 
-	if (gmu->domain) {
-		iommu_detach_device(gmu->domain, &gmu->pdev->dev);
-		iommu_domain_free(gmu->domain);
-		gmu->domain = NULL;
-	}
+	a6xx_gmu_iommu_cb_close(&a6xx_gmu_ctx[GMU_CONTEXT_KERNEL]);
+	a6xx_gmu_iommu_cb_close(&a6xx_gmu_ctx[GMU_CONTEXT_USER]);
 
 	gmu->global_entries = 0;
 }
@@ -2573,7 +2614,8 @@ void a6xx_gmu_remove(struct kgsl_device *device)
 }
 
 static int a6xx_gmu_iommu_fault_handler(struct iommu_domain *domain,
-		struct device *dev, unsigned long addr, int flags, void *token)
+		struct device *dev, unsigned long addr, int flags, void *token,
+		const char *name)
 {
 	char *fault_type = "unknown";
 
@@ -2586,22 +2628,55 @@ static int a6xx_gmu_iommu_fault_handler(struct iommu_domain *domain,
 	else if (flags & IOMMU_FAULT_TRANSACTION_STALLED)
 		fault_type = "transaction stalled";
 
-	dev_err(dev, "GMU fault addr = %lX, context=kernel (%s %s fault)\n",
-			addr,
+	dev_err(dev, "GMU fault addr = %lX, context=%s (%s %s fault)\n",
+			addr, name,
 			(flags & IOMMU_FAULT_WRITE) ? "write" : "read",
 			fault_type);
 
 	return 0;
 }
 
-static int a6xx_gmu_iommu_init(struct a6xx_gmu_device *gmu)
+static int a6xx_gmu_kernel_fault_handler(struct iommu_domain *domain,
+		struct device *dev, unsigned long addr, int flags, void *token)
 {
+	return a6xx_gmu_iommu_fault_handler(domain, dev, addr, flags, token,
+		"gmu_kernel");
+}
+
+static int a6xx_gmu_user_fault_handler(struct iommu_domain *domain,
+		struct device *dev, unsigned long addr, int flags, void *token)
+{
+	return a6xx_gmu_iommu_fault_handler(domain, dev, addr, flags, token,
+		"gmu_user");
+}
+
+static int a6xx_gmu_iommu_cb_probe(struct a6xx_gmu_device *gmu,
+		struct gmu_iommu_context *ctx, struct device_node *parent,
+		iommu_fault_handler_t handler)
+{
+	struct device_node *node = of_get_child_by_name(parent, ctx->name);
+	struct platform_device *pdev;
 	int ret;
 	int no_stall = 1;
 
-	gmu->domain = iommu_domain_alloc(&platform_bus_type);
-	if (gmu->domain == NULL) {
-		dev_err(&gmu->pdev->dev, "Unable to allocate GMU IOMMU domain\n");
+	if (!node)
+		return -ENODEV;
+
+	pdev = of_find_device_by_node(node);
+	ret = of_dma_configure(&pdev->dev, node, true);
+	of_node_put(node);
+
+	if (ret) {
+		platform_device_put(pdev);
+		return ret;
+	}
+
+	ctx->pdev = pdev;
+	ctx->domain = iommu_domain_alloc(&platform_bus_type);
+	if (ctx->domain == NULL) {
+		dev_err(&gmu->pdev->dev, "gmu iommu fail to alloc %s domain\n",
+			ctx->name);
+		platform_device_put(pdev);
 		return -ENODEV;
 	}
 
@@ -2610,22 +2685,38 @@ static int a6xx_gmu_iommu_init(struct a6xx_gmu_device *gmu)
 	 * This sets SCTLR.CFCFG = 0.
 	 * Also note that, the smmu driver sets SCTLR.HUPCF = 0 by default.
 	 */
-	iommu_domain_set_attr(gmu->domain,
+	iommu_domain_set_attr(ctx->domain,
 		DOMAIN_ATTR_FAULT_MODEL_NO_STALL, &no_stall);
 
-	ret = iommu_attach_device(gmu->domain, &gmu->pdev->dev);
+	ret = iommu_attach_device(ctx->domain, &pdev->dev);
 	if (!ret) {
-		iommu_set_fault_handler(gmu->domain,
-			a6xx_gmu_iommu_fault_handler, gmu);
+		iommu_set_fault_handler(ctx->domain, handler, ctx);
 		return 0;
 	}
 
 	dev_err(&gmu->pdev->dev,
-		"Unable to attach GMU IOMMU domain: %d\n", ret);
-	iommu_domain_free(gmu->domain);
-	gmu->domain = NULL;
+		"gmu iommu fail to attach %s device\n", ctx->name);
+	iommu_domain_free(ctx->domain);
+	ctx->domain = NULL;
+	platform_device_put(pdev);
 
 	return ret;
+}
+
+static int a6xx_gmu_iommu_init(struct a6xx_gmu_device *gmu,
+		struct device_node *node)
+{
+	int ret;
+
+	devm_of_platform_populate(&gmu->pdev->dev);
+
+	ret = a6xx_gmu_iommu_cb_probe(gmu, &a6xx_gmu_ctx[GMU_CONTEXT_USER],
+			node, a6xx_gmu_user_fault_handler);
+	if (ret)
+		return ret;
+
+	return a6xx_gmu_iommu_cb_probe(gmu, &a6xx_gmu_ctx[GMU_CONTEXT_KERNEL],
+			node, a6xx_gmu_kernel_fault_handler);
 }
 
 int a6xx_gmu_probe(struct kgsl_device *device,
@@ -2681,7 +2772,7 @@ int a6xx_gmu_probe(struct kgsl_device *device,
 	gmu->num_clks = ret;
 
 	/* Set up GMU IOMMU and shared memory with GMU */
-	ret = a6xx_gmu_iommu_init(gmu);
+	ret = a6xx_gmu_iommu_init(gmu, pdev->dev.of_node);
 	if (ret)
 		goto error;
 

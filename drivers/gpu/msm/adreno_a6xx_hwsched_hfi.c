@@ -490,7 +490,8 @@ static int gmu_import_buffer(struct adreno_device *adreno_dev,
 
 	desc->gmu_addr = vma->next_va;
 
-	mapped = iommu_map_sg(gmu->domain,
+	mapped = iommu_map_sg(a6xx_get_gmu_domain(gmu, desc->gmu_addr,
+			desc->size),
 			desc->gmu_addr, sgt->sgl, sgt->nents, attrs);
 	if (mapped == 0)
 		dev_err(&gmu->pdev->dev, "gmu map sg err: 0x%08x, %d, %x, %zd\n",
