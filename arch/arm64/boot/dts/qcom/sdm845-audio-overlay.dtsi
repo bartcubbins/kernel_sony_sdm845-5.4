@@ -46,9 +46,14 @@
 	qcom,hph-gpio-en1 = <&tavil_hph_en1>;
 	qcom,tavil-mclk-clk-freq = <9600000>;
 
-	asoc-codec = <&stub_codec>, <&ext_disp_audio_codec>;
-	asoc-codec-names = "msm-stub-codec.1",
-			   "msm-ext-disp-audio-codec-rx";
+	asoc-codec = <&stub_codec>, <&wcd934x_cdc>,
+			<&wsa881x_0211>, <&wsa881x_0212>,
+			<&wsa881x_0213>, <&wsa881x_0214>,
+			<&ext_disp_audio_codec>;
+	asoc-codec-names = "msm-stub-codec.1", "tavil_codec",
+			"wsa-codec.1", "wsa-codec.2",
+			"wsa-codec.3", "wsa-codec.4",
+			"msm-ext-disp-audio-codec-rx";
 
 	qcom,usbc-analog-gpio-en1 = <&wcd_usbc_analog_en1_gpio>;
 	qcom,usbc-analog-gpio-en2 = <&tlmm 51 0>;
@@ -57,10 +62,6 @@
 	pinctrl-1 = <&wcd_usbc_analog_en2_idle>;
 
 	qcom,wsa-max-devs = <2>;
-	qcom,wsa-devs = <&wsa881x_0211>, <&wsa881x_0212>,
-			<&wsa881x_0213>, <&wsa881x_0214>;
-	qcom,wsa-aux-dev-prefix = "SpkrLeft", "SpkrRight",
-				  "SpkrLeft", "SpkrRight";
 };
 
 &soc {
