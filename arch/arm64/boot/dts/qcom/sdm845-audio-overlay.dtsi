@@ -62,6 +62,9 @@
 	pinctrl-1 = <&wcd_usbc_analog_en2_idle>;
 
 	qcom,wsa-max-devs = <2>;
+
+	qcom,msm_audio_ssr_devs = <&audio_apr>,
+			<&q6core>, <&wcd934x_cdc>;
 };
 
 &soc {
