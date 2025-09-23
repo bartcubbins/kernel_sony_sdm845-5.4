@@ -2432,30 +2432,14 @@ static void arm_smmu_domain_free(struct iommu_domain *domain)
 	kfree(smmu_domain);
 }
 
-static int arm_smmu_write_smr(struct arm_smmu_device *smmu, int idx)
+static void arm_smmu_write_smr(struct arm_smmu_device *smmu, int idx)
 {
 	struct arm_smmu_smr *smr = smmu->smrs + idx;
 	u32 reg = FIELD_PREP(SMR_ID, smr->id) | FIELD_PREP(SMR_MASK, smr->mask);
-	u32 val;
 
 	if (!(smmu->features & ARM_SMMU_FEAT_EXIDS) && smr->valid)
 		reg |= SMR_VALID;
 	arm_smmu_gr0_write(smmu, ARM_SMMU_GR0_SMR(idx), reg);
-
-	/*
-	 * Check if the write went properly. If failed, we would have to fail
-	 * the attach sequence to avoid any USF faults being generated in the
-	 * future due to device transactions, since this SID entry would not
-	 * be present in the stream mapping table.
-	 */
-	val = arm_smmu_gr0_read(smmu, ARM_SMMU_GR0_SMR(idx));
-	if (val != reg) {
-		dev_err(smmu->dev, "SMR[%d] write err write:0x%lx, read:0x%lx\n",
-				idx, reg, val);
-		return -EINVAL;
-	}
-
-	return 0;
 }
 
 static void arm_smmu_write_s2cr(struct arm_smmu_device *smmu, int idx)
@@ -2472,14 +2456,11 @@ static void arm_smmu_write_s2cr(struct arm_smmu_device *smmu, int idx)
 	arm_smmu_gr0_write(smmu, ARM_SMMU_GR0_S2CR(idx), reg);
 }
 
-static int arm_smmu_write_sme(struct arm_smmu_device *smmu, int idx)
+static void arm_smmu_write_sme(struct arm_smmu_device *smmu, int idx)
 {
 	arm_smmu_write_s2cr(smmu, idx);
 	if (smmu->smrs)
-		if (arm_smmu_write_smr(smmu, idx))
-			return -EINVAL;
-
-	return 0;
+		arm_smmu_write_smr(smmu, idx);
 }
 
 /*
@@ -2733,10 +2714,7 @@ static int arm_smmu_domain_add_master(struct arm_smmu_domain *smmu_domain,
 		s2cr[idx].type = type;
 		s2cr[idx].privcfg = S2CR_PRIVCFG_DEFAULT;
 		s2cr[idx].cbndx = cbndx;
-		if (arm_smmu_write_sme(smmu, idx)) {
-			mutex_unlock(&smmu->stream_map_mutex);
-			return -EINVAL;
-		}
+		arm_smmu_write_sme(smmu, idx);
 	}
 	mutex_unlock(&smmu->stream_map_mutex);
 
