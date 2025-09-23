@@ -8,7 +8,7 @@
 	tavil_codec {
 		wcd: wcd_pinctrl@5 {
 			compatible = "qcom,wcd-pinctrl";
-			qcom,gpios-num = <5>;
+			qcom,gpios-count = <5>;
 			gpio-controller;
 			#gpio-cells = <2>;
 
