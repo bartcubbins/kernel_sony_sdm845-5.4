@@ -350,7 +350,7 @@ BIT_DEF(CALIBRATION_STATE_CALIBRATION_CRC,		0x02, 1);
 ({							\
 	LOG_STAT(this, "(will lock) <" #L ">\n");	\
 	mutex_lock(&(L)->lock);				\
-	get_monotonic_boottime(&(L)->ts);		\
+	ktime_get_boottime_ts64(&(L)->ts);		\
 	(L)->owner_func = __func__;			\
 	(L)->owner_line = __LINE__;			\
 	LOG_STAT(this, "LOCKED <" #L ">\n");		\
@@ -362,7 +362,7 @@ BIT_DEF(CALIBRATION_STATE_CALIBRATION_CRC,		0x02, 1);
 	LOG_STAT(this, "(try lock) <" #L ">\n");			\
 	rc = mutex_trylock(&(L)->lock);					\
 	if (rc) {							\
-		get_monotonic_boottime(&(L)->ts);			\
+		ktime_get_boottime_ts64(&(L)->ts);			\
 		(L)->owner_func = __func__;				\
 		(L)->owner_line = __LINE__;				\
 	}								\
@@ -373,7 +373,7 @@ BIT_DEF(CALIBRATION_STATE_CALIBRATION_CRC,		0x02, 1);
 #define UNLOCK(L)				\
 ({						\
 	LOG_STAT(this, "UNLOCK <" #L ">\n");	\
-	get_monotonic_boottime(&(L)->ts);	\
+	ktime_get_boottime_ts64(&(L)->ts);	\
 	(L)->owner_func = __func__;		\
 	(L)->owner_line = __LINE__;		\
 	mutex_unlock(&(L)->lock);		\
@@ -601,7 +601,7 @@ static const char * const clearpad_calibration_name[] = {
 
 struct clearpad_lock_t {
 	struct mutex lock;
-	struct timespec ts;
+	struct timespec64 ts;
 	const char *owner_func;
 	int owner_line;
 };
@@ -639,9 +639,9 @@ struct clearpad_interrupt_t {
 	struct clearpad_interrupt_wait_t for_reset;
 	struct clearpad_interrupt_wait_t for_F34;
 	struct clearpad_interrupt_wait_t for_F54;
-	struct timespec hard_handler_ts;
-	struct timespec threaded_handler_ts;
-	struct timespec handle_first_event_ts;
+	struct timespec64 hard_handler_ts;
+	struct timespec64 threaded_handler_ts;
+	struct timespec64 handle_first_event_ts;
 };
 
 enum clearpad_reset_e {
@@ -826,8 +826,8 @@ struct clearpad_noise_detect_t {
 	int irq;
 	bool first_irq;
 	int retry_time_ms;
-	struct timespec hard_handler_ts;
-	struct timespec threaded_handler_ts;
+	struct timespec64 hard_handler_ts;
+	struct timespec64 threaded_handler_ts;
 };
 
 struct clearpad_hwtest_t {
@@ -2880,14 +2880,14 @@ static int clearpad_initialize_if_first_event(struct clearpad_t *this,
 					      u8 *interrupt_status,
 					      u8 *device_status)
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int rc = 0;
 	int retry;
 
 	if (this->interrupt.count != 0)
 		goto read_interrupt;
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "read first event (power=%s active=%s) @ %ld.%06ld\n",
 	       touchctrl_is_touch_powered(this) ? "OK" : "NG",
 	       this->dev_active ? "true" : "false",
@@ -2963,7 +2963,7 @@ static int clearpad_handle_if_first_event(struct clearpad_t *this)
 	if (this->interrupt.count != 0)
 		goto end;
 
-	get_monotonic_boottime(&this->interrupt.handle_first_event_ts);
+	ktime_get_boottime_ts64(&this->interrupt.handle_first_event_ts);
 
 	HWLOGI(this, "first event (power=%s active=%s) @ %ld.%06ld\n",
 	       touchctrl_is_touch_powered(this) ? "OK" : "NG",
@@ -5101,7 +5101,7 @@ static irqreturn_t clearpad_threaded_handler(int irq, void *dev_id)
 	unsigned long flags;
 	bool locked;
 
-	get_monotonic_boottime(&this->interrupt.threaded_handler_ts);
+	ktime_get_boottime_ts64(&this->interrupt.threaded_handler_ts);
 
 	LOCK(&this->lock);
 	locked = touchctrl_lock_power(this, "irq_handler", true, false);
@@ -5137,7 +5137,7 @@ static irqreturn_t clearpad_hard_handler(int irq, void *dev_id)
 	irqreturn_t ret;
 	bool val;
 
-	get_monotonic_boottime(&this->interrupt.hard_handler_ts);
+	ktime_get_boottime_ts64(&this->interrupt.hard_handler_ts);
 
 	spin_lock_irqsave(&this->slock, flags);
 
@@ -5165,7 +5165,7 @@ static irqreturn_t clearpad_noise_det_threaded_handler(int irq, void *dev_id)
 	struct clearpad_t *this = dev_id;
 	bool retry = false;
 
-	get_monotonic_boottime(&this->noise_det.threaded_handler_ts);
+	ktime_get_boottime_ts64(&this->noise_det.threaded_handler_ts);
 	LOCK(&this->lock);
 
 	retry = clearpad_process_noise_det_irq(this);
@@ -5205,7 +5205,7 @@ static irqreturn_t clearpad_noise_det_hard_handler(int irq, void *dev_id)
 	irqreturn_t ret;
 	unsigned long flags;
 
-	get_monotonic_boottime(&this->noise_det.hard_handler_ts);
+	ktime_get_boottime_ts64(&this->noise_det.hard_handler_ts);
 	if (clearpad_set_noise_det_irq(this, false, false))
 		HWLOGE(this, "no noise_det irq change(disable)\n");
 	else
@@ -7445,11 +7445,11 @@ static int clearpad_pm_resume(struct device *dev)
 static void clearpad_powerdown_core(struct clearpad_t *this, const char *id)
 {
 	struct clearpad_touchctrl_t *touchctrl = &this->touchctrl;
-	struct timespec ts;
+	struct timespec64 ts;
 	bool already_powerdown;
 	bool locked = false;
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	already_powerdown = this->touchctrl.will_powerdown;
 	if (already_powerdown) {
 		HWLOGI(this, "received %s again "
@@ -7508,13 +7508,13 @@ static void clearpad_cb_powerdown_handler(struct clearpad_t *this)
 
 static void clearpad_cb_early_unblank_handler(struct clearpad_t *this)
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	unsigned long flags;
 
 	if (this->wakeup.unblank_early_done)
 		return;
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	LOCK(&this->lock);
 	this->wakeup.unblank_early_done = true;
 
@@ -7533,10 +7533,10 @@ static void clearpad_cb_early_unblank_handler(struct clearpad_t *this)
 
 static void clearpad_cb_unblank_handler(struct clearpad_t *this)
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	bool power = touchctrl_is_touch_powered(this);
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "UNBLANK (power=%s icount=%u active=%s) @ %ld.%06ld\n",
 	       power ? "OK" : "NG",
 	       this->interrupt.count,
@@ -7572,7 +7572,7 @@ static void clearpad_cb_unblank_handler(struct clearpad_t *this)
 err_in_post_probe_done:
 	UNLOCK(&this->lock);
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "end UNBLANK @ %ld.%06ld\n",
 	       ts.tv_sec, ts.tv_nsec);
 }
@@ -7697,11 +7697,11 @@ static int clearpad_debug_hwtest_log(struct clearpad_t *this,
 	struct clearpad_hwtest_t *hwt = &this->hwtest;
 	int remain = sizeof(hwt->log_buf) - hwt->log_size;
 	int length = 0;
-	struct timespec ts;
+	struct timespec64 ts;
 
 	if (remain <= 1) {
 		/* Rewind */
-		get_monotonic_boottime(&ts);
+		ktime_get_boottime_ts64(&ts);
 		hwt->log_size =
 			scnprintf(hwt->log_buf, sizeof(hwt->log_buf),
 				  "Rewound @ %ld.%06ld\n",
@@ -8950,7 +8950,7 @@ static int clearpad_probe(struct platform_device *pdev)
 	struct clearpad_touchctrl_t *touchctrl;
 	struct kobject *parent;
 	char *symlink_name;
-	struct timespec ts;
+	struct timespec64 ts;
 	int rc;
 	bool retry = false;
 	struct platform_device *rmi_dev = NULL;
@@ -8963,7 +8963,7 @@ static int clearpad_probe(struct platform_device *pdev)
 		goto end;
 	}
 	/* Start logging for probe (no lock until end of probe) */
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	this->hwtest.log_size =
 		scnprintf(this->hwtest.log_buf, sizeof(this->hwtest.log_buf),
 			  "start probe @ %ld.%06ld\n", ts.tv_sec, ts.tv_nsec);
@@ -9197,7 +9197,7 @@ err_free:
 	destroy_workqueue(this->thread_resume.work_queue);
 err_work_queue:
 end_log:
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "end probe @ %ld.%06ld (rc=%d)\n",
 	       ts.tv_sec, ts.tv_nsec, rc);
 end:
@@ -9248,7 +9248,7 @@ static void clearpad_post_probe_work(struct work_struct *work)
 	struct clearpad_t *this
 		= container_of(post_probe, struct clearpad_t, post_probe);
 	const char *session = "post probe";
-	struct timespec ts;
+	struct timespec64 ts;
 
 	int retry;
 	bool do_reschedule = false;
@@ -9262,7 +9262,7 @@ static void clearpad_post_probe_work(struct work_struct *work)
 	}
 	UNLOCK(&this->lock);
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "start post probe @ %ld.%06ld\n", ts.tv_sec, ts.tv_nsec);
 
 	rc = clearpad_ctrl_session_begin(this, session);
@@ -9318,7 +9318,7 @@ static void clearpad_post_probe_work(struct work_struct *work)
 	clearpad_ctrl_session_end(this, session);
 
 err_in_ctrl_session_begin:
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "end post probe @ %ld.%06ld (rc=%d)\n",
 	       ts.tv_sec, ts.tv_nsec, rc);
 
@@ -9357,11 +9357,11 @@ static void clearpad_thread_resume_work(struct work_struct *work)
 	struct clearpad_t *this
 		= container_of(thread_resume,
 				struct clearpad_t, thread_resume);
-	struct timespec ts;
+	struct timespec64 ts;
 	bool locked = false;
 	int rc;
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	LOCK(&this->lock);
 	if (this->dev_active) {
 		HWLOGI(this, "device is already active\n");
@@ -9408,7 +9408,7 @@ static void clearpad_thread_resume_work(struct work_struct *work)
 
 		touchctrl_unlock_power(this, "cb_unblank");
 
-	get_monotonic_boottime(&ts);
+	ktime_get_boottime_ts64(&ts);
 	HWLOGI(this, "end thread_resume @ %ld.%06ld\n",
 	       ts.tv_sec, ts.tv_nsec);
 	goto end;
