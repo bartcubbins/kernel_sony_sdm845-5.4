@@ -635,7 +635,6 @@
 };
 
 &snd_934x {
-	qcom,msm-mbhc-usbc-audio-supported = <1>;
 	qcom,audio-routing =
 		"AIF4 VI", "MCLK",
 		"RX_BIAS", "MCLK",
@@ -648,6 +647,14 @@
 		"Digital Mic3", "MIC BIAS4",
 		"SpkrLeft IN", "SPK1 OUT",
 		"SpkrRight IN", "SPK2 OUT";
+
+	qcom,msm-mbhc-usbc-audio-supported = <1>;
+	io-channels =
+		<&pmi8998_charger PSY_IIO_TYPEC_POWER_ROLE>,
+		<&pmi8998_charger PSY_IIO_TYPEC_MODE>;
+	io-channel-names =
+		"typec_power_role",
+		"typec_mode";
 };
 
 &spmi_bus {
