@@ -702,6 +702,21 @@
 	qcom,fs-current-limit = <20000>;
 };
 
+&pmi8998_lsid1 {
+	wled-bootloader {
+		compatible = "qcom,qpnp-wled";
+		linux,name = "wled";
+		qcom,ovp-mv = <29600>;
+		qcom,ilim-ma = <970>;
+		qcom,fs-curr-ua = <20000>;
+		qcom,led-strings-list = [00 01 02];
+		/* Splash screen brightness can be adjusted here */
+		somc,init-br-ua = <10000>;
+		somc-s1,br-power-save-ua = <800>;
+		status = "okay";
+	};
+};
+
 &vendor {
 	extcon_usb1 {
 		status = "disabled";
