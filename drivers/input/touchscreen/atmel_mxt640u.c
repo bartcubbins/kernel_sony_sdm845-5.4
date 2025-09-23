@@ -2039,6 +2039,7 @@ static void mxt_proc_t93_messages(struct mxt_data *data, u8 *message)
 	int i;
 	int id;
 	bool display_on;
+	incell_pw_status power_status;
 
 	if (data->in_bootloader)
 		return;
@@ -2075,7 +2076,8 @@ static void mxt_proc_t93_messages(struct mxt_data *data, u8 *message)
 		return;
 	}
 
-	display_on = incell_get_system_status();
+	incell_get_power_status(&power_status); 
+	display_on = power_status.display_power;
 	for (i = 0; i < AOD_MODE_DOUBLE_TAP; i++) {
 		if (!display_on)
 			i++;
@@ -4931,6 +4933,8 @@ static bool mxt_check_force_sleep(struct mxt_data *data)
 static void mxt_set_cover_mode(struct mxt_data *data)
 {
 	int sod_mode = SOD_MODE_ON;
+	bool display_on;
+	incell_pw_status power_status;
 
 	if (data->suspended) {
 		LOGN("in suspend will be update after resume\n");
@@ -4947,7 +4951,10 @@ static void mxt_set_cover_mode(struct mxt_data *data)
 		return;
 	}
 
-	if (!incell_get_display_sod() && incell_get_system_status())
+	incell_get_power_status(&power_status); 
+	display_on = power_status.display_power;
+
+	if (!incell_get_display_sod_mode() && display_on)
 		sod_mode = SOD_MODE_OFF;
 	if (data->cover_mode.status) {
 		if (data->glove_mode.status)
@@ -9344,7 +9351,7 @@ static int mxt_drm_suspend(struct mxt_data *data)
 	if (data->watchdog.supported)
 		cancel_delayed_work(&data->watchdog.work);
 
-	data->sod_mode.status = incell_get_display_sod();
+	data->sod_mode.status = incell_get_display_sod_mode();
 	if (data->sod_mode.pre_status && data->sod_mode.status == SOD_POWER_OFF) {
 		LOGN("%s　power off\n", __func__);
 	} else if (data->sod_mode.pre_status) {
