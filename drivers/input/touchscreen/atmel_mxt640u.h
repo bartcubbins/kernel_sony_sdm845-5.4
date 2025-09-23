@@ -635,7 +635,7 @@ struct mxt_driver_data {
 	int touch_current_temp;
 	int touch_previous_temp_mode;
 
-	struct timeval t_ex_debug[TIME_EX_PROFILE_MAX];
+	struct timespec64 t_ex_debug[TIME_EX_PROFILE_MAX];
 	u8 resume_flag;
 	u16 retry_chk;
 	u8 ime_status_value;

@@ -1421,14 +1421,14 @@ int mxt_get_reference_chk(struct mxt_data *data)
 		half_err_cnt = 3;
 		data->mxt_drv_data->resume_flag = 0;
 	} else if (last_call_statue == INCOMING_CALL_OFFHOOK && data->incoming_call == INCOMING_CALL_IDLE) {
-		do_gettimeofday(&data->mxt_drv_data->t_ex_debug[TIME_EX_INIT_TIME]);
+		ktime_get_real_ts64(&data->mxt_drv_data->t_ex_debug[TIME_EX_INIT_TIME]);
 		data->mxt_drv_data->resume_flag = 1;
 	}
 
 	last_call_statue = data->incoming_call;
 
 	if (data->mxt_drv_data->resume_flag) {
-		do_gettimeofday(&data->mxt_drv_data->t_ex_debug[TIME_EX_FIRST_INT_TIME]);
+		ktime_get_real_ts64(&data->mxt_drv_data->t_ex_debug[TIME_EX_FIRST_INT_TIME]);
 
 		if ( data->mxt_drv_data->t_ex_debug[TIME_EX_FIRST_INT_TIME].tv_sec - data->mxt_drv_data->t_ex_debug[TIME_EX_INIT_TIME].tv_sec <= 3 ) {
 			half_err_cnt = 3;
@@ -9503,7 +9503,7 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 {
 	struct drm_ext_event *evdata = (struct drm_ext_event *)data;
 	struct mxt_data *ts = container_of(self, struct mxt_data, drm_notif);
-	struct timespec tspec;
+	struct timespec64 tspec;
 	int blank;
 
 	if (evdata && evdata->data) {
@@ -9520,12 +9520,12 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 					return 0;
 				}
 
-				get_monotonic_boottime(&tspec);
+				ktime_get_boottime_ts64(&tspec);
 				LOGD("start@%ld.%06ld\n",
 					tspec.tv_sec, tspec.tv_nsec);
 				if (mxt_drm_suspend(ts))
 					LOGE("Failed mxt_drm_suspend\n");
-				get_monotonic_boottime(&tspec);
+				ktime_get_boottime_ts64(&tspec);
 				LOGD("end@%ld.%06ld\n",
 					tspec.tv_sec, tspec.tv_nsec);
 				break;
@@ -9553,12 +9553,12 @@ static int drm_notifier_callback(struct notifier_block *self, unsigned long even
 					return 0;
 				}
 
-				get_monotonic_boottime(&tspec);
+				ktime_get_boottime_ts64(&tspec);
 				LOGD("start@%ld.%06ld\n",
 					tspec.tv_sec, tspec.tv_nsec);
 				if (mxt_drm_resume(ts))
 					LOGE("Failed mxt_drm_resume\n");
-				get_monotonic_boottime(&tspec);
+				ktime_get_boottime_ts64(&tspec);
 				LOGD("end@%ld.%06ld\n",
 					tspec.tv_sec, tspec.tv_nsec);
 				break;
