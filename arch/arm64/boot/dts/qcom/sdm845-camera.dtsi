@@ -416,8 +416,8 @@
 		interconnects =<&gladiator_noc MASTER_AMPSS_M0
 				&config_noc SLAVE_CAMERA_CFG>;
 		interconnect-names = "cam_ahb";
-		cam-ahb-num-cases = <7>;
-		cam-ahb-bw-KBps =
+		bus-num-cases = <7>;
+		bus-bw-KBps =
 			<0 0>, <0 76500>, <0 76500>, <0 150000>,
 			<0 150000>, <0 300000>, <0 300000>;
 		vdd-corners = <RPMH_REGULATOR_LEVEL_RETENTION
@@ -453,11 +453,17 @@
 			qcom,axi-port1 {
 				qcom,axi-port-name = "cam_hf_1";
 				qcom,axi-port-mnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&mmss_noc MASTER_CAMNOC_HF0
 							&mc_virt SLAVE_EBI1>;
 					interconnect-names = "cam_hf_1_mnoc";
 				};
 				qcom,axi-port-camnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&camnoc_virt MASTER_CAMNOC_HF0_UNCOMP
 							&camnoc_virt SLAVE_CAMNOC_UNCOMP>;
 					interconnect-names = "cam_hf_1_camnoc";
@@ -466,11 +472,17 @@
 			qcom,axi-port2 {
 				qcom,axi-port-name = "cam_hf_2";
 				qcom,axi-port-mnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&mmss_noc MASTER_CAMNOC_HF1
 							&mc_virt SLAVE_EBI1>;
 					interconnect-names = "cam_hf_2_mnoc";
 				};
 				qcom,axi-port-camnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&camnoc_virt MASTER_CAMNOC_HF1_UNCOMP
 							&camnoc_virt SLAVE_CAMNOC_UNCOMP>;
 					interconnect-names = "cam_hf_2_camnoc";
@@ -479,11 +491,17 @@
 			qcom,axi-port3 {
 				qcom,axi-port-name = "cam_sf_1";
 				qcom,axi-port-mnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&mmss_noc MASTER_CAMNOC_SF
 							&mc_virt SLAVE_EBI1>;
 					interconnect-names = "cam_sf_1_mnoc";
 				};
 				qcom,axi-port-camnoc {
+					bus-dyn-vote;
+					bus-num-cases = <1>;
+					bus-bw-KBps = <0 0>;
 					interconnects =<&camnoc_virt MASTER_CAMNOC_SF_UNCOMP
 							&camnoc_virt SLAVE_CAMNOC_UNCOMP>;
 					interconnect-names = "cam_sf_1_camnoc";
