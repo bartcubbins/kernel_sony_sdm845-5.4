@@ -147,7 +147,7 @@
 	};
 
 	qcom,cam_smmu {
-		compatible = "qcom,msm-cam-smmu";
+		compatible = "qcom,msm-cam-smmu", "simple-bus";
 		status = "ok";
 		non-fatal-fault-disabled;
 
