@@ -613,7 +613,13 @@
 			qcom,thermal-derate-en;
 			qcom,thermal-derate-current = <200 500 1000>;
 			qcom,isc-delay = <192>;
-			qcom,pmic-revid = <&pmi8998_revid>;
+
+			io-channels = <&pmi8998_fg PSY_IIO_RESISTANCE>,
+				      <&pmi8998_fg PSY_IIO_VOLTAGE_OCV>,
+				      <&pmi8998_fg PSY_IIO_CURRENT_NOW>;
+			io-channel-names = "rbatt",
+				      "voltage_ocv",
+				      "current_now";
 
 			pmi8998_flash0: qcom,flash_0 {
 				label = "flash";
