@@ -26,6 +26,8 @@ if STAGING
 
 source "drivers/staging/wlan-ng/Kconfig"
 
+source "drivers/staging/wlan-qc/Kconfig"
+
 source "drivers/staging/comedi/Kconfig"
 
 source "drivers/staging/olpc_dcon/Kconfig"
