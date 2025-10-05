@@ -37,7 +37,7 @@
 #define MASTER_CNOC_DC_NOC		23
 #define MASTER_AMPSS_M0			24
 #define MASTER_GNOC_CFG			25
-#define MASTER_IPA_CORE			26
+/* 26 was previously assigned to MASTER_IPA_CORE, now represented as RPMh clock */
 #define MASTER_LLCC			27
 #define MASTER_TCU_0			28
 #define MASTER_MEM_NOC_CFG		29
@@ -122,7 +122,7 @@
 #define SLAVE_GNOC_SNOC			564
 #define SLAVE_GNOC_MEM_NOC		565
 #define SLAVE_SERVICE_GNOC		566
-#define SLAVE_IPA_CORE			567
+/* 567 was previously assigned to SLAVE_IPA_CORE, now represented as RPMh clock */
 #define SLAVE_EBI1			568
 #define SLAVE_MSS_PROC_MS_MPU_CFG	569
 #define SLAVE_MEM_NOC_GNOC		570

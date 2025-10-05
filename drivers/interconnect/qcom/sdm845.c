@@ -442,16 +442,6 @@ static struct qcom_icc_node pm_gnoc_cfg = {
 	.links = { SLAVE_SERVICE_GNOC },
 };
 
-static struct qcom_icc_node ipa_core_master = {
-	.name = "ipa_core_master",
-	.id = MASTER_IPA_CORE,
-	.channels = 1,
-	.buswidth = 8,
-	.noc_ops = &qcom_qnoc4_ops,
-	.num_links = 1,
-	.links = { SLAVE_IPA_CORE },
-};
-
 static struct qcom_icc_node llcc_mc = {
 	.name = "llcc_mc",
 	.id = MASTER_LLCC,
@@ -1514,15 +1504,6 @@ static struct qcom_icc_node srvc_gnoc = {
 	.num_links = 0,
 };
 
-static struct qcom_icc_node ipa_core_slave = {
-	.name = "ipa_core_slave",
-	.id = SLAVE_IPA_CORE,
-	.channels = 1,
-	.buswidth = 8,
-	.noc_ops = &qcom_qnoc4_ops,
-	.num_links = 0,
-};
-
 static struct qcom_icc_node ebi = {
 	.name = "ebi",
 	.id = SLAVE_EBI1,
@@ -1768,13 +1749,6 @@ static struct qcom_icc_bcm bcm_ce0 = {
 	.voter_idx = VOTER_IDX_HLOS,
 	.num_nodes = 1,
 	.nodes = { &qxm_crypto },
-};
-
-static struct qcom_icc_bcm bcm_ip0 = {
-	.name = "IP0",
-	.voter_idx = VOTER_IDX_HLOS,
-	.num_nodes = 1,
-	.nodes = { &ipa_core_slave },
 };
 
 static struct qcom_icc_bcm bcm_cn0 = {
@@ -2424,29 +2398,6 @@ static struct qcom_icc_desc sdm845_system_noc = {
 	.num_voters = ARRAY_SIZE(system_noc_voters),
 };
 
-static struct qcom_icc_bcm *ipa_virt_bcms[] = {
-	&bcm_ip0,
-};
-
-static struct qcom_icc_node *ipa_virt_nodes[] = {
-	[MASTER_IPA_CORE] = &ipa_core_master,
-	[SLAVE_IPA_CORE] = &ipa_core_slave,
-};
-
-static char *ipa_virt_voters[] = {
-	[VOTER_IDX_HLOS] = "hlos",
-};
-
-static struct qcom_icc_desc sdm845_ipa_virt = {
-	.config = &icc_regmap_config,
-	.nodes = ipa_virt_nodes,
-	.num_nodes = ARRAY_SIZE(ipa_virt_nodes),
-	.bcms = ipa_virt_bcms,
-	.num_bcms = ARRAY_SIZE(ipa_virt_bcms),
-	.voters = ipa_virt_voters,
-	.num_voters = ARRAY_SIZE(ipa_virt_voters),
-};
-
 static struct regmap *
 qcom_icc_map(struct platform_device *pdev, const struct qcom_icc_desc *desc)
 {
@@ -2617,8 +2568,6 @@ static const struct of_device_id qnoc_of_match[] = {
 	  .data = &sdm845_mmss_noc},
 	{ .compatible = "qcom,sdm845-system_noc",
 	  .data = &sdm845_system_noc},
-	{ .compatible = "qcom,sdm845-ipa_virt",
-	  .data = &sdm845_ipa_virt},
 	{ .compatible = "qcom,sdm845-camnoc_virt",
 	  .data = &sdm845_camnoc_virt},
 	{ }
