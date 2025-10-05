@@ -5,6 +5,7 @@
  */
 
 #include <dt-bindings/interconnect/qcom,sdm845.h>
+#include <linux/clk.h>
 #include <linux/device.h>
 #include <linux/interconnect.h>
 #include <linux/interconnect-provider.h>
@@ -2525,6 +2526,10 @@ static int qnoc_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	qp->num_clks = devm_clk_bulk_get_all(qp->dev, &qp->clks);
+	if (qp->num_clks < 0)
+		return qp->num_clks;
+
 	for (i = 0; i < num_nodes; i++) {
 		size_t j;
 
@@ -2571,6 +2576,8 @@ err:
 		icc_node_destroy(node->id);
 	}
 
+	clk_bulk_put_all(qp->num_clks, qp->clks);
+
 	icc_provider_del(provider);
 	return ret;
 }
@@ -2585,6 +2592,8 @@ static int qnoc_remove(struct platform_device *pdev)
 		icc_node_del(n);
 		icc_node_destroy(n->id);
 	}
+
+	clk_bulk_put_all(qp->num_clks, qp->clks);
 
 	return icc_provider_del(provider);
 }
