@@ -2965,7 +2965,8 @@
 		qcom,use-64-bit-dma-mask;
 		qcom,arm-smmu;
 		qcom,smmu-fast-map;
-		qcom,bandwidth-vote-for-ipa;
+		clock-names = "core_clk";
+		clocks = <&clock_rpmh RPMH_IPA_CLK>;
 		qcom,interconnect,num-cases = <5>;
 		qcom,interconnect,num-paths = <3>;
 		interconnect-names = "ipa_to_ebi1", "ipa_to_imem", "appss_to_ipa";
@@ -2983,7 +2984,7 @@
 
 		/* SVS */
 		qcom,svs =
-			< 80000 640000 80000 640000 80000 80000>;
+			<80000 640000 80000 640000 80000 80000>;
 
 		/* NOMINAL */
 		qcom,nominal =
