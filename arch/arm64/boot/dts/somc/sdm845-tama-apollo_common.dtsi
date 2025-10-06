@@ -14,12 +14,15 @@
 	panel = <&dsi_4 &dsi_8>;
 };
 
-
 &soc {
 	ldo_vibrator {
 		compatible = "ldo-vibrator";
 		gpios = <&pmi8998_gpios 5 1>;
 	};
+};
+
+&pmi8998_haptics {
+	status = "disabled";
 };
 
 /* GPIO_5: VIB_LDO_EN */
