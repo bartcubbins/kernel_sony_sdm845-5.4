@@ -272,10 +272,10 @@ static const struct pinctrl_pin_desc sdm845_pins[] = {
 	PINCTRL_PIN(147, "GPIO_147"),
 	PINCTRL_PIN(148, "GPIO_148"),
 	PINCTRL_PIN(149, "GPIO_149"),
-	PINCTRL_PIN(150, "SDC2_CLK"),
-	PINCTRL_PIN(151, "SDC2_CMD"),
-	PINCTRL_PIN(152, "SDC2_DATA"),
-	PINCTRL_PIN(153, "UFS_RESET"),
+	PINCTRL_PIN(150, "UFS_RESET"),
+	PINCTRL_PIN(151, "SDC2_CLK"),
+	PINCTRL_PIN(152, "SDC2_CMD"),
+	PINCTRL_PIN(153, "SDC2_DATA"),
 };
 
 #define DECLARE_MSM_GPIO_PINS(pin) \
@@ -431,10 +431,10 @@ DECLARE_MSM_GPIO_PINS(147);
 DECLARE_MSM_GPIO_PINS(148);
 DECLARE_MSM_GPIO_PINS(149);
 
-static const unsigned int sdc2_clk_pins[] = { 150 };
-static const unsigned int sdc2_cmd_pins[] = { 151 };
-static const unsigned int sdc2_data_pins[] = { 152 };
-static const unsigned int ufs_reset_pins[] = { 153 };
+static const unsigned int ufs_reset_pins[] = { 150 };
+static const unsigned int sdc2_clk_pins[] = { 151 };
+static const unsigned int sdc2_cmd_pins[] = { 152 };
+static const unsigned int sdc2_data_pins[] = { 153 };
 
 enum sdm845_functions {
 	msm_mux_ddr_pxi3,
@@ -1646,10 +1646,10 @@ static const struct msm_pingroup sdm845_groups[] = {
 	[147] = PINGROUP(147, NORTH, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	[148] = PINGROUP(148, NORTH, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA),
 	[149] = PINGROUP(149, NORTH, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA),
-	[150] = SDC_QDSD_PINGROUP(sdc2_clk, 0x99a000, 14, 6),
-	[151] = SDC_QDSD_PINGROUP(sdc2_cmd, 0x99a000, 11, 3),
-	[152] = SDC_QDSD_PINGROUP(sdc2_data, 0x99a000, 9, 0),
-	[153] = UFS_RESET(ufs_reset, 0x99f000),
+	[150] = UFS_RESET(ufs_reset, 0x99f000),
+	[151] = SDC_QDSD_PINGROUP(sdc2_clk, 0x99a000, 14, 6),
+	[152] = SDC_QDSD_PINGROUP(sdc2_cmd, 0x99a000, 11, 3),
+	[153] = SDC_QDSD_PINGROUP(sdc2_data, 0x99a000, 9, 0),
 };
 
 static const struct msm_gpio_wakeirq_map sdm845_pdc_map[] = {
@@ -1683,7 +1683,7 @@ static const struct msm_pinctrl_soc_data sdm845_pinctrl = {
 	.nfunctions = ARRAY_SIZE(sdm845_functions),
 	.groups = sdm845_groups,
 	.ngroups = ARRAY_SIZE(sdm845_groups),
-	.ngpios = 150,
+	.ngpios = 151,
 	.wakeirq_map = sdm845_pdc_map,
 	.nwakeirq_map = ARRAY_SIZE(sdm845_pdc_map),
 	.dir_conn = sdm845_dir_conn,
