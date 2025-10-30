@@ -1601,6 +1601,17 @@
 		reset-names = "core_reset";
 
 		status = "disabled";
+
+		/* PM QoS */
+		qos0 {
+			mask = <0x0f>;
+			vote = <70>;
+		};
+
+		qos1 {
+			mask = <0xf0>;
+			vote = <70>;
+		};
 	};
 
 	sdhc_2: sdhci@8804000 {
@@ -1656,13 +1667,18 @@
 			<&clock_gcc GCC_SDCC2_APPS_CLK>;
 		clock-names = "iface_clk", "core_clk";
 
-		/* PM QoS */
-		qcom,pm-qos-irq-type = "affine_irq";
-		qcom,pm-qos-irq-latency = <70 70>;
-		qcom,pm-qos-cpu-groups = <0x3f 0xc0>;
-		qcom,pm-qos-legacy-latency-us = <70 70>, <70 70>;
-
 		status = "disabled";
+
+		/* PM QoS */
+		qos0 {
+			mask = <0x3f>;
+			vote = <70>;
+		};
+
+		qos1 {
+			mask = <0xc0>;
+			vote = <70>;
+		};
 	};
 
 	pil_scm_pas {
