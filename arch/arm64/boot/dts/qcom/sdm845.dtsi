@@ -11,6 +11,7 @@
 #include <dt-bindings/clock/qcom,videocc-sdm845.h>
 #include <dt-bindings/clock/qcom,rpmh.h>
 #include <dt-bindings/clock/qcom,aop-qmp.h>
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/regulator/qcom,rpmh-regulator-levels.h>
 #include <dt-bindings/interconnect/qcom,icc.h>
 #include <dt-bindings/interconnect/qcom,osm-l3.h>
@@ -1593,9 +1594,7 @@
 		"HS_RB_G1_L2", "HS_RB_G2_L2", "HS_RB_G3_L2",
 		"MAX";
 
-		pinctrl-names = "dev-reset-assert", "dev-reset-deassert";
-		pinctrl-0 = <&ufs_dev_reset_assert>;
-		pinctrl-1 = <&ufs_dev_reset_deassert>;
+		reset-gpios = <&tlmm 150 GPIO_ACTIVE_LOW>;
 
 		resets = <&clock_gcc GCC_UFS_PHY_BCR>;
 		reset-names = "core_reset";
