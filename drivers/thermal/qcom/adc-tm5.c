@@ -18,7 +18,7 @@
 #define ADC_TM_STATUS2				0x09
 #define ADC_TM_STATUS_LOW			0x0a
 #define ADC_TM_STATUS_HIGH			0x0b
-#define ADC_TM_NUM_BTM				0x0f
+#define ADC_TM_NUM_CHANNELS			8
 
 #define ADC_TM_ADC_DIG_PARAM			0x42
 #define ADC_TM_FAST_AVG_CTL			0x43
@@ -993,19 +993,13 @@ static int adc_tm5_register_interrupts(struct adc_tm_chip *chip)
 
 static int adc_tm5_init(struct adc_tm_chip *chip, uint32_t dt_chans)
 {
-	u8 buf[4], channels_available, meas_int_timer_2_3 = 0;
+	u8 buf[4], meas_int_timer_2_3 = 0;
 	int ret;
 	unsigned int offset_btm_idx = 0, i;
 
-	ret = adc_tm_read_reg(chip, ADC_TM_NUM_BTM, &channels_available, 1);
-	if (ret < 0) {
-		pr_err("read failed for BTM channels\n");
-		return ret;
-	}
-
-	if (dt_chans > channels_available) {
+	if (dt_chans > ADC_TM_NUM_CHANNELS) {
 		pr_err("Number of nodes greater than channels supported:%d\n",
-							channels_available);
+							ADC_TM_NUM_CHANNELS);
 		return -EINVAL;
 	}
 
