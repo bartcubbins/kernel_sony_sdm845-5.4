@@ -2932,11 +2932,35 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	io-channels = <&pm8998_vadc ADC5_AMUX_THM2_100K_PU>,
+	io-channels = <&pm8998_vadc ADC5_VPH_PWR>,
+			<&pm8998_vadc ADC5_XO_THERM_100K_PU>,
+			<&pm8998_vadc ADC5_AMUX_THM1_100K_PU>,
+			<&pm8998_vadc ADC5_AMUX_THM2_100K_PU>,
+			<&pm8998_vadc ADC5_AMUX_THM3_100K_PU>,
 			<&pm8998_vadc ADC5_AMUX_THM4_100K_PU>,
+			<&pm8998_vadc ADC5_AMUX_THM5_100K_PU>,
 			<&pm8998_vadc ADC5_GPIO2_100K_PU>;
 
 	/* Channel nodes */
+	vph_pwr@83 {
+		label = "vph_pwr";
+		reg = <ADC5_VPH_PWR>;
+	};
+
+	xo_therm@4c {
+		label = "xo_therm";
+		reg = <ADC5_XO_THERM_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	msm_therm@4d {
+		label = "msm_therm";
+		reg = <ADC5_AMUX_THM1_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
 	ufs_therm@4e {
 		label = "ufs_therm";
 		reg = <ADC5_AMUX_THM2_100K_PU>;
@@ -2944,9 +2968,23 @@
 		qcom,hw-settle-time = <200>;
 	};
 
+	pa_therm1@4f {
+		label = "pa_therm1";
+		reg = <ADC5_AMUX_THM3_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
 	pa_therm2@50 {
 		label = "pa_therm2";
 		reg = <ADC5_AMUX_THM4_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	quiet_therm@51 {
+		label = "quiet_therm";
+		reg = <ADC5_AMUX_THM5_100K_PU>;
 		qcom,ratiometric;
 		qcom,hw-settle-time = <200>;
 	};
