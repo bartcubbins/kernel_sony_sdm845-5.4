@@ -382,6 +382,8 @@
 		polling-delay-passive = <10>;
 		polling-delay = <100>;
 		thermal-governor = "step_wise";
+		thermal-sensors = <&tsens0 11>, <&tsens0 12>;
+		sensor-aggregation = <AGGREGATE_MAX_VALUE>;
 		wake-capable-sensor;
 		trips {
 			gpu_trip0: gpu-trip0 {
@@ -403,6 +405,9 @@
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "step_wise";
+		thermal-sensors = <&tsens0 1>, <&tsens0 2>,
+				<&tsens0 3>, <&tsens0 4>;
+		sensor-aggregation = <AGGREGATE_MAX_VALUE>;
 		wake-capable-sensor;
 		trips {
 			silver-trip {
@@ -417,6 +422,9 @@
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "step_wise";
+		thermal-sensors = <&tsens0 7>, <&tsens0 8>,
+				<&tsens0 9>, <&tsens0 10>;
+		sensor-aggregation = <AGGREGATE_MAX_VALUE>;
 		wake-capable-sensor;
 		trips {
 			gold-trip {
