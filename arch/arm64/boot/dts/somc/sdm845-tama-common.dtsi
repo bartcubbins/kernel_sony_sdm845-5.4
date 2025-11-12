@@ -3019,7 +3019,7 @@
 	ufs_therm {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x4e>;
+		thermal-sensors = <&pm8998_adc_tm ADC5_AMUX_THM2_100K_PU>;
 		thermal-governor = "user_space";
 
 		trips {
@@ -3043,7 +3043,7 @@
 	pa_therm2 {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x50>;
+		thermal-sensors = <&pm8998_adc_tm ADC5_AMUX_THM4_100K_PU>;
 		thermal-governor = "user_space";
 
 		trips {
@@ -3067,7 +3067,7 @@
 	flash_therm {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x53>;
+		thermal-sensors = <&pm8998_adc_tm ADC5_GPIO2_100K_PU>;
 		thermal-governor = "user_space";
 
 		trips {
